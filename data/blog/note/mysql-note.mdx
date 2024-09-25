@@ -1,0 +1,406 @@
+---
+title: 'MySQL 学习笔记'
+date: '2023-05-17'
+# lastmod: '1900-01-01'
+tags: ['note', 'mysql']
+draft: false
+summary: '以前学 Java 的时候对 sql 略有了解, 前端也有一些框架如next.js、nest.js、koa.js等都可以与数据库打交道, 鉴于现在前端有全栈的趋势, 一个合格的前端不能再只局限于写写页面了, 所以再次温习一下吧.'
+images: []
+layout: PostLayout
+---
+
+## 安装
+
+[下载 MySQL](https://downloads.mysql.com/archives/community/), 我是 m1 的 mac, 选择了 `8.x` arm 版本.(貌似很多公司都在使用5.x).
+
+mac 上 `mysql.server` 在 `/usr/local/mysql/support-files/mysql.server`, 建议先配置一下环境变量.
+
+```sh
+# .zshrc
+export MYSQL_HOME=/usr/local/mysql
+export PATH=$MYSQL_HOME/support-files:$MYSQL_HOME/bin:$PATH # 按需配置
+```
+
+```sh
+# 起停
+sudo mysql.server start
+sudo mysql.server restart
+sudo mysql.server stop
+# 登陆/退出
+mysql [-h 主机] [-P 端口] -u 用户 -p 密码 # mysql 端口默认 3306
+exit
+```
+
+## 基础概念
+
+### mysql 的三层结构
+
+1. `DBMS` (database manage system)
+2. `db`, dbms 下可以有多个 db
+3. `table`, db 下可以有多个 table
+
+> 普通的表本质都是真真实实的文件.
+
+### sql 语句分类
+
+- `DDL`, data definition language, 数据定义语句, [create, alter 表, 库...]
+- `DML`, data manipulation language, 数据操纵语句, [insert, update, delete]
+- `DQL`, data query language, 数据查询语句 [select]
+- `DCL`, data control language, 数据控制语句 [管理数据库, grant, revoke]
+
+> 注意, 在 mysql 的控制台环境下语句要以分号 `;` 结尾
+
+---
+
+### db 相关语句
+
+```sql:DATABASE增删改查用
+CREATE DATABASE [IF NOT EXISTS] <db_name> [CHARACTER SET charset_name] [COLLATE collation_name]
+DROP DATABASE [IF EXISTS] <db_name>
+ALTER DATABASE [IF NOT EXISTS] <db_name> [CHARACTER SET charset_name] [COLLATE collation_name]
+SHOW DATABASES
+SHOW CREATE DATABASE <db_name> # 查看创建时的 DDL
+
+use <db_name>
+status # 查看mysql的整体信息
+```
+
+- 字符集默认为 `utf8mb4`
+- 校对规则选择 `utf8mb4_general_ci`, 不区分大小写, 相对的 `utf8mb4_bin` 区分大小写 
+
+```sql:数据库备份
+# 备份所有数据库
+mysqldump -u <username> -p -all-databases > <path/xx.sql>
+# 备份多个数据库
+mysqldump -u <username> -p --databases <dbname1> <dbname2> > <path/xx.sql> # -B 也可
+# 备份指定数据库和表
+mysqldump -u <username> -p <dbname> <tablename> ... > <path/xx.sql>  
+
+# 还原
+mysql -u <username> -p [dbname] < xx.sql
+# 或者进入mysql的命令行客户端后进行恢复
+source <path/xx.sql>
+```
+
+### table 相关语句
+
+```sql:TABLE容器增删改查
+CREATE TABLE <tb_name> (filed dataType [,...]) [CHARACTER SET charset_name] [COLLATE collation_name] ENGINE 存储引擎
+CREATE TABLE <tb_name> LIKE <source_tb_name> # 复制
+DROP TABLE <tab_name>
+RENAME TABLE <tb_name> TO <new_tb_name>
+SHOW TABLES
+
+# 列操作, 大部分时候其实可以用工具来做,但是基础的命令还是得清楚的.
+ALTER TABLE <tb_name> ADD (col_name col_type [DEFAULT expr], ...) [AFTER col_name]
+ALTER TABLE <tb_name> DROP (col_name, ...)
+ALTER TABLE <tb_name> MODIFY (col_name col_type [DEFAULT expr], ...)
+ALTER TABLE <tb_name> CHANGE [column] col_name new_col_name new_col_type
+DESC <tb_name> 
+# 修改列属性可以用 modify, 但是修改列名只能用 change.
+```
+
+```sql:TABLE数据增删改
+INSERT INTO <tb_name> [col_1,col_2,...] values (val1, val2,...) [,(...),(...)]
+DELETE FROM tb_name [WHERE condition]
+UPDATE <tb_name> SET col_1=value1[,col_2=value2,...] [WHERE condition]
+
+# 迁移表的操作. col1s和col2s要一一对应
+INSERT INTO <target_tb>
+            (col1s...)
+            SELECT (col2s...) from <source_tb>;
+# 自我复制. 执行多次，指数级复制
+INSERT INTO <tb_name> SELECT * FROM <tb_name>;
+```
+
+注意点:
+- `insert into` 一整条数据时, 列名可以省略; 无论什么时候, 值和列名一一对应
+- `update` 语句没有指定 `WHERE` 子句，则更新对应列的所有行
+- `delete` 语句没有指定 `WHERE` 子句，则清空整张表
+- **_字符_**和**_日期类型_**数据应当包含在单引号中
+
+#### 自增长
+
+一般来说 自增长和主键配合使用(单独使用需要配合 unique)
+
+```sql
+create table tb_name (col1 col1_type primary key auto_increment, ...);
+# 插入数据的时候, 自增长的字段填null即可
+insert into tb_name values(null, col2, ....);
+# 修改开始值 (默认从1开始)
+alter table tb_name auto_increment = num;
+```
+---
+```sql:TABLE数据查询
+# 基础
+SELECT [DISTINCT] * | col_name,col_name... FROM <tb_name> [alias_tb_name]  [WHERE condition] [ORDER BY column1 [ASC | DESC]];
+# 分页
+SELECT * FROM <tb_name> LIMIT start,rows; # 从 start+1 行开始, 取 rows 行;  如果看成索引0开始, 表示区间[start, rows)
+```
+- `DISTINCT` 用于对查询结果去重
+- 查询的列也可以为表达式并且可以赋予别名，比如 `select (col1 + col2 + col3) as <alias_name> from <tb_name>`, 别名可用于 `WHERE` 语句分类
+- `WHERE` 语句基础参考 [菜鸟教程](https://www.runoob.com/mysql/mysql-where-clause.html); 模糊查询参考 [like, regexp, in](https://www.cnblogs.com/javahr/p/9780650.html); 聚合查询参考 [GROUP BY 和 HAVING](https://www.cnblogs.com/duanxz/p/5088110.html)
+- 几个关键字顺序 `group by, having, order by, limit` 
+
+### **多表查询**
+
+_多表查询是一个非常频繁使用的查询场景, 需熟练掌握._
+
+#### 笛卡尔集
+
+当查询多表时，默认返回结果是 `表1的行 * 表2的行 * ...` 的集合，称为 `笛卡尔集`。
+
+```sql
+# 使用 where 过滤笛卡尔集
+select * from tb_a, tb_b where tb_a.field_1 = tb_b.field_1;
+```
+> 过滤笛卡尔集的 where 筛选条件，`不能少于表的数量-1`，否则还是会出现笛卡尔集.
+
+#### 外连接
+
+上方过滤笛卡尔集的多表查询, 查出来的都是匹配上的数据.
+假如说需要一张表上没有匹配上的数据也显示出来（只不过为 null 嘛）, 就需要外连接来完成了.
+
+- 左外连接，左侧的表完全显示 `tb1 LEFT JOIN tb2 on condition`
+- 右外连接，右侧的表完全显示 `tb1 RIGHT JOIN tb2 on condition`
+
+```sql:举例
+select * from emp left join dept on emp.deptno = dept.deptno;
+```
+
+#### 合并查询
+把两个 select 查询语句通过 `union` 或 `union all` 连接起来. 需要注意的是: **合并查询的列的数量要一致**.
+
+- `union`: 简单的把查询出来的结果合并, 并去重
+- `union all`: 相比 union 不会去重
+
+#### 子查询
+
+子查询是将一个查询语句嵌套在另一个查询语句中.子查询必须用小括号包裹.
+
+- `where` 型, 用来做查询条件
+- `from` 型, 用来做一个**临时表**
+
+内容较多, 可以参考这篇笔记 [子查询](https://www.cnblogs.com/chiangchou/p/mysql-3.html).
+
+#### 自连接
+
+查询的数据在一张表中.**自连接需要给表取别名，为了明确，最好给列也取上别名.**
+
+```sql
+select worker.name as '打工人', boss.name as '领导'
+from emp worker, emp boss where worker.mgr = boss.id;
+```
+
+### mysql 约束
+
+约束, 用于确保数据库的数据满足特定的商业规则. mysql 中有 5 种约束：
+- not null
+- unique
+- primary key
+- foreign key
+- check
+
+
+### 常用查询函数
+
+```sql
+count(*|col)SUM(col)|AVG(col)|MAX(col)|MIN(col)
+# 字符
+CHARSET/CONCAT/UCASE/LCASE/LENGTH/SUBSTRING/TRIM
+# 数字
+ABS/CEILING/FLOOR/FORMAT/MOD/RAND
+# 时间
+current_date/current_time/current_timestamp/now/
+DATE_ADD/DATE_SUB/DATEDIFF/TIMEDIFF/UNIX_TIMESTAMP/FROM_UNIXTIME
+# 流程控制
+IF(expr1, expr2, expr3)   # 等价于js的三元 expr1 ? expr2 : expr3
+IFNULL(expr1, expr2)      # expr1 === null ? expr2 : expr1
+# sql 的 if...else...
+SELECT CASE
+          WHEN expr1 then expr2
+          WHEN expr3 then expr4
+          ELSE expr5 
+        END
+```
+
+### 常用数据类型
+
+| 分类       | 数据类型                          | 说明                                                                           |
+| ---------- | --------------------------------- | ------------------------------------------------------------------------------ |
+| 数值类型   | BIT(M)                            | 位类型，M 指定位数，默认为 1，范围 1 ～ 64。                                   |
+|            | TINYINT 1 个字节 (boolean)        | 无符号：[0,2 ** 8-1]，有符号：[-2 ** 7，2 ** 7-1]，默认有符号                  |
+|            | SMALLINT 2 个字节                 | 无符号：[0,2 ** 16-1]，有符号：[-2 ** 15，2 ** 15-1]                           |
+|            | MEDIUMINT 3 个字节                | 无符号：[0,2 ** 24-1]，有符号：[-2 ** 23，2 ** 23-1]                           |
+|            | INT 4 个字节                      | 无符号：[0,2 ** 32-1]，有符号：[-2 ** 31，2 ** 31-1]                           |
+|            | BIGINT 8 个字节                   | 无符号：[0,2 ** 64-1]，有符号：[-2 ** 63，2 ** 63-1]                           |
+|            |                                   |                                                                                |
+|            | FLOAT 4 个字节                    |                                                                                |
+|            | DOUBLE 8 个字节                   |                                                                                |
+|            | DECIMAL(M,D)，m 默认 10，d 默认 0 | M 指定长度，D 指定小数点后面的位数 ，M 最大 65，D 最大 30                      |
+| 文本类型   | CHAR(size)                        | 固定长度字符串，最大为 255 个`字符`                                            |
+|            | VARCHAR(size)                     | 可变长度字符串，最大 65535 （2\*\*16-1） 个`字节`，使用 1-3 个字节记录内容长度 |
+|            | TEXT                              | 2\*\*16-1 个字节                                                               |
+|            | LONGTEXT                          | 2\*\*32-1 个字节                                                               |
+| 时间日期   | DATE                              | 日期                                                                           |
+|            | TIME                              | 时间                                                                           |
+|            | DATETIME                          | 日期+时间                                                                      |
+|            | TIMESTAMP                         | 可以自动记录 UPDATE，INSERT 的时间                                             |
+| 二进制类型 | BLOB                              | 2\*\*16-1 个字节                                                               |
+|            | LONGBLOB                          | 2\*\*32-1 个字节                                                               |
+
+---
+
+## 索引
+
+### 基础
+
+说起提高数据库性能，索引是最物美价廉的东西了。不用加内存，不用改程序，不用调 sql，查询速度就可能提高百倍干倍。
+
+```sql
+# 给表的某列添加索引
+create index index_name on tb_name (tb_col_name);
+```
+
+> 创建索引后，查询只对创建了索引的列有效，性能提高显著
+
+副作用：
+
+- 索引自身也是占用空间的，添加索引后，表占用空间会变大
+- 对 DML (insert into, update, delete) 语句有效率影响 (因为需要重新构建索引)
+
+### 原理
+
+- 没有索引时：从头到尾全表扫描
+- 创建索引后：存储引擎 innodb，B+树，牺牲空间换时间～ TODO
+
+### 索引类型
+
+- 主键索引，主键自动地为主索引
+- 唯一索引，unique 修饰的列
+- 普通索引，index
+- 全文索引，FULLTEXT，一般不用 mysql 自带的全文索引
+  - 开发中考虑使用全文搜索 solr，或者 ElasticSearch（即 es）
+
+### 使用
+
+```sql
+# 查询是否有索引
+SHOW INDEXES FROM tb_name
+
+# 创建或修改
+create [unique] index index_name on tb_name (col_name [(length)])
+alter table tb_name add index index_name (col_name)
+
+# 删除索引
+drop index index_name on tb_name
+# 删除主键索引
+alter table tb_name drop primary key
+```
+
+### 场景
+
+- 一般频繁查询的字段应该创建索引
+- 唯一性太差的字段不适合创建索引
+- 更新非常频繁的字段不适合创建索引
+- 不会出现在 where 子句中的字段不该创建索引
+
+---
+
+## 事务
+
+**事务** 用于保证数据的一致性，它由*一组 dml 语句组成*，该组的 dml 语句，要么全部成功，要么全部失败。-- 比如转账，如果转出成功，转入失败，是很恐怖的事情。这就需要事务确保了。
+
+> 当执行事务操作时，mysql 会在表上加锁，防止其他用户修改表的数据。
+
+> mysql 事务机制需要使用 innodb 引擎， MyISAM 不好使。
+
+### 事务操作
+
+- start transaction，-- 开始一个事务 或者 set autocommit=off
+- savepoint point_name，-- 设置保存点
+- rollback to point_name，-- 回退事务
+- rollback，-- 回退全部事务
+- commit，-- 提交事务，所有的操作生效，不能回退，删除保存点，释放锁
+
+> 默认情况下，dml 操作时自动提交的。
+
+### 事务隔离级别
+
+多个端连接开启各自事务操作数据库时，数据库要负责隔离操作，以保证各个连接在获取数据时的准确性。
+
+事务与事务之间的隔离程度，一共有四种：
+
+| mysql 隔离级别              | 脏读 | 不可重复读 | 幻读 | 加锁读 | 解释｜                                                                |
+| --------------------------- | ---- | ---------- | ---- | ------ | --------------------------------------------------------------------- |
+| 读未提交 (READ UNCOMMITTED) | ✅   | ✅         | ✅   | 不加锁 | 一个事务可以读取到另一个事务未提交的数据                              |
+| 读已提交 (READ COMMITTED)   | ❌   | ✅         | ✅   | 不加锁 | 一个事务只能读取到已提交的数据                                        |
+| 可重复读 (REPEATABLE READ)  | ❌   | ❌         | ❌   | 不加锁 | 同一事务中多次读取相同记录时，结果始终一致                            |
+| 可串行化 (SERIALIZABLE)     | ❌   | ❌         | ❌   | 加锁   | 最严格的隔离级别，确保事务之间彼此完全隔离,可能会影响系统的并发性能。 |
+
+---
+
+不考虑事务隔离，就会导致下列问题：
+
+- 脏读：指一个事务读取了另一个事务未提交的数据。换句话说，当一个事务正在修改数据时，另一个事务读取了这些未提交的数据。如果修改事务最终回滚，那么读取事务就会读取到无效的数据，这就是脏读。
+- 不可重复读：指在同一事务中，多次读取同一数据，但由于其他事务的修改导致读取结果不一致。换句话说，一个事务在多次读取同一数据时，由于其他事务的更新操作，导致了数据的不一致性，这就是不可重复读。
+- 幻读：指在同一事务中，多次执行相同的查询，但由于其他事务的插入或删除操作，导致了结果集的变化。换句话说，一个事务在多次查询相同条件的数据时，由于其他事务的插入或删除操作，导致了结果集的变化，这就是幻读。
+
+---
+
+**隔离级别默认为可重复读**
+
+```sql
+# 查看隔离级别
+SELECT @@transaction_isolation; # 老版本叫 tx_isolation
+# 设置隔离级别
+set session transaction isolation level [read committed |read uncommitted | repeatable read | serializable]
+```
+
+### mysql 常用存储引擎 （MyISAM,InnoDB,Memory）
+
+以下是 gpt 给出的结论：
+
+1. 事务支持：
+
+   - MyISAM：不支持事务，无法实现回滚和提交操作。
+   - InnoDB：支持事务，可以实现回滚和提交操作，确保数据的一致性和完整性。
+   - Memory：不支持事务，数据存储在内存中，不会持久化到磁盘上。
+
+2. 锁机制：
+
+   - MyISAM：采用表级锁，当进行写操作时会锁定整个表，可能导致并发性能下降。
+   - InnoDB：采用行级锁，可以实现更好的并发性能，允许多个事务同时对同一表进行读写操作。
+   - Memory：采用表级锁，类似于 MyISAM，但由于数据存储在内存中，锁的影响相对较小。
+
+3. 外键支持：
+
+   - MyISAM：不支持外键约束，无法实现关系型数据库的完整性。
+   - InnoDB：支持外键约束，可以定义和管理表之间的关系，确保数据的完整性。
+   - Memory：不支持外键约束，适合用于临时数据存储和快速访问，但不适合长期持久化的数据存储。
+
+4. ACID 属性：
+
+   - MyISAM：不满足 ACID（原子性、一致性、隔离性、持久性）属性，无法保证事务的完整性和持久性。
+   - InnoDB：满足 ACID 属性，可以确保事务的原子性、一致性、隔离性和持久性。
+   - Memory：不满足 ACID 属性，适合用于临时数据存储和快速访问，但不适合长期持久化的数据存储。
+
+5. 性能特点：
+
+   - MyISAM：适合于读密集型操作，对于大量的查询操作性能较好。
+   - InnoDB：适合于写密集型操作和事务处理，对于数据的插入、更新和删除操作性能较好。
+   - Memory：适合于对数据的快速访问和临时存储，但不适合长期持久化的数据存储。
+
+6. 可靠性：
+
+   - MyISAM：在发生故障时，可能会导致数据损坏，不够可靠。
+   - InnoDB：具有良好的容错性和恢复能力，对数据的完整性和可靠性有较好的保障。
+   - Memory：数据存储在内存中，不具备持久化能力，不够可靠。
+
+7. 缓存和索引：
+
+   - MyISAM：采用缓存和索引机制，适合于大量的查询操作。
+   - InnoDB：采用缓存和索引机制，支持更复杂的查询和事务处理。
+   - Memory：数据存储在内存中，具有非常快速的访问速度，适合于临时数据存储和快速访问。
+
+综上所述，选择合适的存储引擎取决于应用程序的特定需求。如果需要事务支持、数据完整性和可靠性，则 InnoDB 是一个不错的选择。如果对性能要求较高，可以考虑 MyISAM。而 Memory 存储引擎适合于临时数据存储和快速访问的场景，比如用户的在线状态。

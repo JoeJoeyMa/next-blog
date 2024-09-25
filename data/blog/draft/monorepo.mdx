@@ -1,0 +1,54 @@
+---
+title: 'monorepo'
+date: ''
+# lastmod: '1900-01-01'
+tags: ['engineering']
+draft: true
+summary: ''
+images: []
+layout: PostLayout
+---
+
+## pnpm-workspace.yaml
+```sh
+# 工程目录下
+touch pnpm-workspace.yaml
+```
+```yaml:pnpm-workspace.yaml
+packages:
+    - 'packages/**' // 包括
+    - '!**/test/**' // 排除
+```
+
+## 安装全局依赖
+
+```sh
+# -w (--workspace-root) -D
+pnpm add <lib> -w
+```
+
+## 安装部分依赖
+```sh
+# 远程
+pnpm --filter <dir> add <lib>
+# 本地 workspace，先配置 .package.json
+"dependencies": {
+    "utils": "workspace:*"
+}
+```
+
+## 管理工具
+
+- [changesets](https://pnpm.io/zh/8.x/workspaces#%E5%8F%91%E5%B8%83%E5%B7%A5%E4%BD%9C%E6%B5%81)
+
+```sh
+# 安装
+pnpm add -Dw @changesets/cli
+# init, .changeset存着初始化配置
+pnpm changeset init
+# 产生变更集
+pnpm changeset [add]
+# 发布
+pnpm changeset publish
+```
+
