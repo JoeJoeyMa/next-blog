@@ -5,6 +5,7 @@ import Link from './Link'
 import MobileNav from './MobileNav'
 import ThemeSwitch from './ThemeSwitch'
 import SearchButton from './SearchButton'
+import OpenToWorkBadge from './OpenToWorkBadge'
 
 const Header = () => {
   return (
