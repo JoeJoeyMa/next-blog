@@ -3,6 +3,7 @@ const siteMetadata = {
   title: 'MASON Blog',
   author: 'MASON',
   headerTitle: 'MASON',
+  avatar: '/static/images/avatar.png',
   description: '',
   language: 'en-us',
   theme: 'system', // system, dark or light
