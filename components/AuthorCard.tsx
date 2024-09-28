@@ -4,18 +4,8 @@ import siteMetadata from '@/data/siteMetadata'
 import { RoughNotation } from 'react-rough-notation'
 
 const AuthorCard = ({ content }) => {
-  const {
-    author,
-    avatar,
-    occupation,
-    qualifications,
-    email,
-    devto,
-    x,
-    linkedin,
-    github,
-    location,
-  } = siteMetadata
+  const { author, avatar, occupation, qualifications, email, x, linkedin, github, location } =
+    siteMetadata
   return (
     <div>
       <div className="flex flex-row items-center justify-center space-x-2 pb-8">
@@ -49,7 +39,6 @@ const AuthorCard = ({ content }) => {
           <div className="md:text-md text-base text-gray-500 dark:text-gray-400">{location}</div>
           <div className="flex space-x-3 pt-6">
             <SocialIcon kind="mail" href={`mailto:${email}`} />
-            <SocialIcon kind="devto" href={devto} />
             <SocialIcon kind="github" href={github} />
             <SocialIcon kind="linkedin" href={linkedin} />
             <SocialIcon kind="x" href={x} />
@@ -69,35 +58,36 @@ const AuthorCard = ({ content }) => {
             >
               FullStack Engineer{' '}
             </RoughNotation>
-            focused on Software engineer, interested and working, aiming to be an independent developer.
+            focused on Software engineer, interested and working, aiming to be an independent
+            developer.
           </p>
           <div className="py-4">
             <span className="m-2 inline-block rounded-full bg-teal-200 px-2 py-1 text-sm text-teal-900">
-            Frameworks
+              Frameworks
             </span>
             <span className="m-2 inline-block rounded-full  bg-indigo-200 px-2 py-1 text-sm text-indigo-900">
-            DevOps
+              DevOps
             </span>
             <span className="m-2 inline-block rounded-full  bg-blue-200 px-2 py-1 text-sm text-blue-900">
-            Cloud Platforms
+              Cloud Platforms
             </span>
             <span className="m-2 inline-block rounded-full  bg-purple-200 px-2 py-1 text-sm text-purple-900">
-            Optimized
+              Optimized
             </span>
             <span className="m-2 inline-block rounded-full  bg-red-200 px-2 py-1 text-sm text-red-900">
-            Designed
+              Designed
             </span>
             <span className="m-2 inline-block rounded-full  bg-green-200 px-2 py-1 text-sm text-green-900">
-            animations
+              animations
             </span>
             <span className="m-2 inline-block rounded-full  bg-orange-200 px-2 py-1 text-sm text-orange-900">
-            Integrated
+              Integrated
             </span>
             <span className="m-2 inline-block rounded-full  bg-fuchsia-200 px-2 py-1 text-sm text-fuchsia-900">
-            dynamic
+              dynamic
             </span>
             <span className="m-2 inline-block rounded-full  bg-lime-200 px-2 py-1 text-sm text-lime-900">
-               Testing
+              Testing
             </span>
             <span className="m-2 inline-block rounded-full  bg-amber-200 px-2 py-1 text-sm text-amber-900">
               Compliance Management
