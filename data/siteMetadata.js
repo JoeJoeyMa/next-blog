@@ -15,6 +15,7 @@ const siteMetadata = {
   email: 'joejoey.ma@gmail.com',
   github: 'https://github.com/JoeJoeyMa',
   x: 'https://x.com/JoeyJoeMA',
+  devto: ''
   // facebook: 'https://facebook.com',
   // youtube: 'https://youtube.com',
   // linkedin: 'https://www.linkedin.com',
