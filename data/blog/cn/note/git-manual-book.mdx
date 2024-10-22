@@ -1,0 +1,160 @@
+---
+title: 'Git manual book (自用)'
+date: '2022-09-19'
+lastmod: '2024-07-11'
+tags: ['git']
+authors: ['MASON']
+language: cn
+draft: false
+summary: '结合多年使用 Git 的经验，汇总了快捷操作技巧和常见问题解决方案.'
+images: []
+layout: PostLayout
+---
+
+## **本文基于 git version 2.32.0**
+
+相对于 SourceTree 可视化图形管理软件, 我更喜欢简约直接的命令行风格.
+
+(小声bb: VsCode 的 SOURCE CONTROL 我还是经常用的, 这个敲命令就有点麻烦了👿哈哈)
+
+---
+
+### 别名配置
+
+工欲善其事, 必先利其器. 简单的别名可以事半功倍, 是我换电脑后的必办事项之一.
+
+```sh:前置操作(复制进terminal回车即可)
+# oh-my-zsh 的 git 插件 自带了一部分别名, 下面是我经常使用的
+git config --global alias.g git
+git config --global alias.cg 'config --global'
+```
+
+```sh
+# 只 clone 某个分支/tag, 对于大型仓库很实用 g cloneb <brName/tagName> <url>
+g cg alias.cloneb 'clone --single-branch --branch'
+
+# 常规
+g cg alias.st status
+g cg alias.ad 'add -A'
+g cg alias.cm 'commit -m'
+g cg alias.ps push
+g cg alias.pso 'push origin'
+g cg alias.pl pull
+g cg alias.plo 'pull origin'
+
+# 当最新 commit 还未推到远程仓库前的三种常用操作:
+# 1. 修改这个 commit message
+g cg alias.cam 'commit --amend -m'
+# 2. 在这个 commit 上新增变动
+g cg alias.can 'commit --amend --no-edit'
+# 3. 这个 commit 有些许问题, 放弃回退到 staged
+g cg alias.back 'reset --soft HEAD^'
+
+# 分支管理 (多一嘴,对于新手需要认知到的是: 分支名只是一个特殊的commit指针而已, tag 也一样❕)
+g cg alias.cb 'checkout -b'           # 增
+g cg alias.db 'branch -d'             # 删 本地
+g cg alias.fdb 'branch -D'            # 删 本地(强制)
+g cg alias.drb 'push origin --delete' # 删 远程
+g cg alias.rename 'branch --move'     # 改
+g cg alias.br branch                  # 查
+# ⭐️ checkout 作用就是带着 HEAD 指针到处跑~（g ck - 快速切至上一个分支，同理 g merge -）
+g cg alias.ck checkout
+
+# 标签管理
+# 增 g tag <tagName>
+# 单推 g pso <tagName> 全推 g pso --tags
+g cg alias.dt 'tag -d'                # 删 本地
+g cg alias.drt 'push origin --delete' # 删 远程
+
+# 其他常用操作
+# 1. 开发到一半去改bug
+g cg alias.sh stash
+g cg alias.shp 'stash pop'
+# 2. 回退
+g cg alias.rv 'revert'          # 变相回退,产生一个镜像的commit
+g cg alias.rh 'reset --hard'    # 与 --soft 相比,会重置暂存区和工作区
+# 3. 时光机 reflog & cherry-pick 结合使用
+## reflog 能查看HEAD指针所有行走的轨迹,包括被reset移出的commit; cp 就可以让你有后悔药了~
+g cg alias.cp cherry-pick       # g cp <commit/brname>
+# cp 区间 g cp  commitA..commitB  把区间 (A, B] 的 commit 都合进来，A 早于 B 的
+# cp 区间 g cp  commitA^..commitB 把区间 [A, B] 的 commit 都合进来
+# 如果是 brname 则是把该分支最新commit合并(再次验证 brname 也就是一个指针~)
+
+# log 美化
+g cg alias.lg "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+## 根据 commit 内容查找 commit
+g cg alias.find "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --grep"
+## 根据 commit 用户查找 commit
+g cg alias.findby "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --author"
+```
+
+新版本 git 新增了 `switch/restore` 命令, 真就一次没用过😆~
+
+> 注意：reflog 查看的是本地历史，在别的电脑上是看不见的，同理如果电脑坏了，那么再也回不到未来了...另外，git reflog 不会永远保持，Git 会定期清理那些 “用不到的” 对象，不要指望几个月前的提交还一直在那里。
+
+### 用户信息配置
+
+个人习惯是公司的项目都单独配置，全局配置给自己用。
+
+```sh
+# 独立配置
+g config user.name 'xxx'
+g config user.email 'yourmail@xx.com'
+
+# 全局配置
+g cg user.name 'xxx'
+g cg user.email 'yourmail@xx.com'
+```
+
+### HEAD 知多少
+
+说一下基础认知：
+
+- 所有的 commit 组成了一颗多叉树
+- branchName 是多叉树的某个分支指针, 指向这条分支上最新的 commit
+- tagName 可以看成是对应 commit 的别名
+
+而 `HEAD` 是特殊的指针，指向的是当前工作台所处的 commit。
+
+常用的 HEAD 简写 `HEAD^n` 与 `HEAD~n`：
+
+- HEAD^^^ 等价于 HEAD~3 表示父父父提交
+- HEAD^3 表示的是父提交的第三个提交，即合并进来的其他提交
+
+---
+
+## 提交规范
+
+通过 `husky` + `lint-staged` 配合来进行约束，详细配置根据项目来设定。
+
+## 常见问题
+
+#### git log 中文字符乱码
+
+```yml
+# vim ~/.gitconfig
+export LC_ALL=zh_CN.UTF-8
+export LANG=zh_CN.UTF-8
+export LESSHARESET=utf-8
+```
+
+#### 处理拒绝合并不相关历史
+
+`fatal: refusing to merge unrelated histories`
+
+```sh {lineNos=false}
+g plo develop --allow-unrelated-histories
+```
+
+#### Git error on git pull (unable to update local ref)
+
+```sh
+g remote prune origin
+```
+
+### 参考
+
+- [Pro Git 2nd Edition](https://git-scm.com)
+- [“纸上谈兵”之 Git 原理](https://mp.weixin.qq.com/s/FSBEM2GqhpVJ6yw9FkxnGA)
+- [Git Tools - Submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules)
+- [Git submodule 子模块的管理和使用](https://www.jianshu.com/p/9000cd49822c)

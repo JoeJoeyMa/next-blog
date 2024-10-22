@@ -1,0 +1,365 @@
+---
+title: '前缀树'
+date: '2022-11-13'
+# lastmod: '1900-01-01'
+tags: ['data structure', 'algorithm']
+authors: ['MASON']
+language: cn
+draft: false
+summary: '浅学一下前缀树, 也叫字典树🌲'
+images: []
+layout: PostLayout
+---
+## 概念及实现
+
+前缀树，也叫字典树，就是一种数据结构，比如有一组字符串 `['abc', 'ab', 'bc', 'bck']`，那么它的前缀树是这样的：
+
+<img src='https://cdn.jsdelivr.net/gh/yokiizx/picgo@main/img/202402131753139.png' className='w-[200px]'/>
+
+核心：**字符在树的树枝上，节点上保存着信息** (当然不是这么死，个人习惯，程序怎么实现都是 ok 的)，含义如下：
+
+-   p：通过树枝字符的字符串数量. -- 可以查询前缀数量
+-   e：以树枝字符结尾的字符串数量. -- 可以查询字符串
+
+对应的数据结构如下：
+
+```js
+class TrieNode {
+    constructor(pass = 0, end = 0) {
+        this.pass = pass // 通过下接树枝字符的字符串数量
+        this.end = end // 以上接树枝字符结尾的字符串数量
+        this.next = {} // {char: TrieNode} 的 map 集， 字符有限，有些教程也用数组实现；next 的 key 就可以抽象为树枝
+    }
+}
+class Trie {
+    constructor() {
+        this.root = new TrieNode()
+    }
+    insert(str) {
+        let p = this.root
+        for (const c of str) {
+            if (!p.next[c]) {
+                p.next[c] = new TrieNode()
+            }
+            p = p.next[c]
+            p.pass++
+        }
+        p.end++
+    }
+    // 查询字符串。根据实际问题，看是返回 Boolean 还是  end
+    search(str) {
+        let p = this.root
+        for (const c of str) {
+            if (!p.next[c]) return 0
+            // if (!p.next[c].pass) return 0 // 根据实际情况看是否需要做什么额外操作
+            p = p.next[c]
+        }
+        return p.end
+    }
+    // 有几个以 str 为前缀的字符串。根据实际问题，看是返回 Boolean 还是 pass
+    startWidth(str) {
+        let p = this.root
+        for (const c of prefix) {
+            if (!p.next[c]) return 0
+            // if (!p.next[c].pass) return 0 // 根据实际情况看是否需要做什么额外操作
+            p = p.next[c]
+        }
+        return p.pass
+    }
+    delete(str) {
+        if (this.search(str) !== 0) {
+            let p = this.root
+            p.pass--
+            for (const c of str) {
+                p.next[c].pass--
+                if (p.next[c].pass == 0) {
+                    p.next[c] = null // 当某个节点的 pass 为 0 的时候，说明后面都没得了，可以直接把后续置 null 了
+                    return
+                }
+                p = p.next[c]
+            }
+            p.end--
+        }
+    }
+}
+```
+
+## 练一练
+
+### lc.208 实现前缀树
+
+```js
+/**
+ * 自定义前缀树节点
+ */
+
+class TrieNode {
+    constructor() {
+        this.pass = 0
+        this.end = 0
+        this.next = {}
+    }
+}
+var Trie = function () {
+    this.root = new TrieNode()
+}
+
+/**
+ * @param {string} word
+ * @return {void}
+ */
+Trie.prototype.insert = function (word) {
+    let p = this.root
+    for (const c of word) {
+        if (!p.next[c]) {
+            p.next[c] = new TrieNode()
+        }
+        p = p.next[c]
+        p.pass++
+    }
+    p.end++
+}
+
+/**
+ * @param {string} word
+ * @return {boolean}
+ */
+Trie.prototype.search = function (word) {
+    let p = this.root
+    for (const c of word) {
+        if (!p.next[c]) return false
+        p = p.next[c]
+    }
+    return p.end > 0
+}
+
+/**
+ * @param {string} prefix
+ * @return {boolean}
+ */
+Trie.prototype.startsWith = function (prefix) {
+    let p = this.root
+    for (const c of prefix) {
+        if (!p.next[c]) return false
+        p = p.next[c]
+    }
+    return true
+}
+
+/**
+ * Your Trie object will be instantiated and called as such:
+ * var obj = new Trie()
+ * obj.insert(word)
+ * var param_2 = obj.search(word)
+ * var param_3 = obj.startsWith(prefix)
+ */
+```
+
+### lc.211 添加与搜索单词 - 数据结构设计
+
+```js
+class TrieNode {
+    constructor(pass = 0, end = 0) {
+        this.pass = pass
+        this.end = end
+        this.next = {}
+    }
+}
+var WordDictionary = function () {
+    this.root = new TrieNode()
+}
+
+/**
+ * @param {string} word
+ * @return {void}
+ */
+WordDictionary.prototype.addWord = function (word) {
+    let p = this.root
+    for (const c of word) {
+        if (!p.next[c]) {
+            p.next[c] = new TrieNode()
+        }
+        p = p.next[c]
+        p.pass++
+    }
+    p.end++
+}
+
+/**
+ * @param {string} word
+ * @return {boolean}
+ */
+    // 注意第二个参数 是后来自己写的时候添加的，因为要寻找 . 之后的
+WordDictionary.prototype.search = function (word, newRoot) {
+    let p = this.root
+    if (newRoot) p = newRoot
+    for (let i = 0; i < word.length; ++i) {
+        const c = word[i]
+        if (c === '.') {
+            // 关键在怎么处理这里，因为 . 匹配任意字符
+            // 最直观的做法就是把 . 替换成可能得字符，然后挨个尝试
+            if (i === word.length) return true
+            const keys = Object.keys(p.next)
+            // 一开始这么写的，缺少了 start，每次都从头开始搜索，这就不对了，那就把 p 带上
+            // return keys.some(d => this.search(d + word.slice(i + 1)))
+            return keys.some(d => this.search(d + word.slice(i + 1), p))
+        } else {
+            if (!p.next[c]) return false
+            p = p.next[c]
+        }
+    }
+    return p.end > 0
+}
+
+/**
+ * Your WordDictionary object will be instantiated and called as such:
+ * var obj = new WordDictionary()
+ * obj.addWord(word)
+ * var param_2 = obj.search(word)
+ */
+/** 这题我写的和官解略有不同，但总体思路都是深度优先遍历 dfs */
+```
+
+### lc.648 单词替换
+
+```js
+/**
+ * @param {string[]} dictionary
+ * @param {string} sentence
+ * @return {string}
+ */
+var replaceWords = function (dictionary, sentence) {
+    let trie = new Trie()
+    dictionary.forEach(s => trie.insert(s))
+
+    return sentence
+        .split(' ')
+        .map(s => trie.search(s))
+        .join(' ')
+}
+// 读这道题意，很容易想得到 前缀树
+class TrieNode {
+    constructor(pass = 0, end = 0) {
+        this.pass = pass
+        this.end = end
+        this.next = {}
+    }
+}
+class Trie {
+    constructor() {
+        this.root = new TrieNode()
+    }
+    insert(str) {
+        let p = this.root
+        for (const c of str) {
+            if (!p.next[c]) {
+                p.next[c] = new TrieNode()
+            }
+            p = p.next[c]
+            p.pass++
+        }
+        p.end++
+    }
+    search(str) {
+        let p = this.root
+        let i = 0
+        for (const c of str) {
+            if (!p.next[c]) {
+                return p.end > 0 ? str.slice(0, i) : str
+            }
+            p = p.next[c]
+            i++
+            /**
+             * 一开始这两个边界条件我给漏了。。。
+             * 一个是 p 走到头了， 一个是 i 走到头了~
+             */
+            if (p.end > 0) return str.slice(0, i)
+            if (i === str.length && p.pass > 0) return str
+        }
+    }
+}
+```
+
+### lc.677 键值映射
+
+```js
+class TrieNode {
+    constructor(pass = 0, end = 0) {
+        this.pass = pass
+        this.end = end
+        this.val = 0
+        this.next = {}
+    }
+}
+var MapSum = function () {
+    this.root = new TrieNode()
+}
+
+/**
+ * @param {string} key
+ * @param {number} val
+ * @return {void}
+ */
+MapSum.prototype.insert = function (key, val) {
+    let p = this.root
+    for (const c of key) {
+        if (!p.next[c]) {
+            p.next[c] = new TrieNode()
+        }
+        p = p.next[c]
+        p.pass++
+    }
+    p.end++
+    p.val = val
+}
+
+/**
+ * @param {string} prefix
+ * @return {number}
+ */
+MapSum.prototype.sum = function (prefix) {
+    let p = this.root
+    for (const c of prefix) {
+        if (!p.next[c]) return 0
+        p = p.next[c]
+    }
+    // 递归查找之后所有的 val 并累加即可
+    let sum = 0
+    /** 第一次做，漏掉了恰好相等的条件 */
+    if (p && p.end > 0) sum += p.val
+    const getVal = p => {
+        if (!p) return
+        const allKeys = Object.keys(p.next)
+        if (!allKeys.length) return
+        allKeys.forEach(c => {
+            let newP = p // 第一次做，这里也忘记处理了。。。
+            newP = newP.next[c]
+            if (newP && newP.end > 0) sum += newP.val
+            getVal(newP)
+        })
+    }
+    getVal(p)
+    return sum
+}
+
+/**
+ * Your MapSum object will be instantiated and called as such:
+ * var obj = new MapSum()
+ * obj.insert(key,val)
+ * var param_2 = obj.sum(prefix)
+ */
+```
+
+这道题我纯用前缀树实现了，递归的过程有点费时间，优化时间复杂度，自然上 hashMap，官解里有实现，自行理解。
+
+---
+
+## 常见场景
+
+前缀树的作用：
+
+1. 查询字符串
+2. 查询以某个字符串为前缀的字符串有多少个
+3. 自动补完
+
+上面两个作用，第一个 hashMap 也能做到，但是其他点，则是前缀树发挥其本领的绝对领地了。

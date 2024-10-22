@@ -43,7 +43,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     return [{ url: mainUrl }, ...alternateauthorsUrls]
   })
 
-  const routes = ['', 'blog', 'projects', 'tags'].flatMap((route) => {
+  const routes = ['', 'CV', 'blog', 'projects', 'tags'].flatMap((route) => {
     const mainUrl = `${siteUrl}/${fallbackLng}/${route}`.replace(/\/$/, '')
     const alternateUrls: { url: string; lang: string }[] = []
 

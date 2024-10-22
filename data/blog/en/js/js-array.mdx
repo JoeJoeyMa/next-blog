@@ -1,0 +1,65 @@
+---
+title: '重学 JavaScript 数组'
+date: '2022-09-21'
+# lastmod: '1900-01-01'
+tags: ['JavaScript']
+authors: ['MASON']
+language: en
+draft: false
+summary: 'JavaScript 中的数组只不过是名字叫数组而已, 与数据结构中的数组几乎没有关系.'
+images: []
+layout: PostLayout
+---
+
+> JavaScript 中的数组只不过是名字叫数组而已, 与数据结构中的数组几乎没有关系.
+
+---
+
+V8 源码中, **JSArray 是继承自 JSObject, 是特殊的对象**, 内部也是用 key-value 的形式存储数据, 所以可以存放不同类型的值, 这在 Java 类语言的数组中是做不到的。
+
+> 请注意: 数组根据下标索引查找元素的时间复杂度为 O(1), 而不是数组查找的时间复杂度, 即使是用二分查找也得 O(logn)
+
+## 快慢数组
+
+JavaScript 中的数组分为快慢数组.
+
+存储结构:
+
+- 快数组：存储结构是`FixedArray`, `length <= elements.length()`, `push` 和 `pop` 会动态扩容缩容
+- 慢数组：存储结构是`HashTable`, 数组下标作为 `key`
+
+内存使用:
+
+- 快数组: 使用的是一段连续的内存, 可以直接用索引定位, 新创建的数组默认就是快数组, `new Array(x)`, 当数组长度大于 `x` 继续 `push` 会动态扩容
+- 慢数组: 不需要连续内存空间, 维护一个哈希表, 与快数组相比性能较差
+
+### 快慢转换
+
+快变慢：
+
+- 当前加入的索引减去当前容量(capacity)大于等于 1024。(index - capacity >= 1024), 意味着空洞大于等于 1024
+- 3 \* 扩容后容量 \* 2 `<=` 新容量. 其实目的就是节省内存空间
+
+慢变快：
+
+- 当慢数组节省空间 `<= 50%` 的时候就会变成快数组。
+
+## 为什么下标从 0 开始
+
+1. 历史原因: `C -> Java -> JavaScript`
+2. 数组寻址时减少 CPU 指令运算
+3. 物理内存的地址是从 0 开始的
+
+```js
+// 寻址公式
+arr[i] = base_address + i * type_size
+// 其中base_address为数组arr首地址, arr0就是 **偏移量** 为0的数组, 即数组arr首地址；
+// i为偏移量, type_size为数组类型字节数, 比如int为32位, 即4个字节
+
+arr[i] = base_address + (i - 1) * type_size
+// 多了一次减 1 的运算
+```
+
+## 参考
+
+- [探究JS V8引擎下的“数组”底层实现](https://mp.weixin.qq.com/s/np9Yoo02pEv9n_LCusZn3Q)

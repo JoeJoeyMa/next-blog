@@ -4,30 +4,17 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 })
 
-const path = require('path')
-const CopyPlugin = require('copy-webpack-plugin')
-
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  i18n: {
-    locales: ['en', 'zh'],
-    defaultLocale: 'en',
-  },
-}
-
-module.exports = nextConfig
-
 // You might need to insert additional domains in script-src if you are using external services
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app analytics.umami.is;
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app analytics.umami.is statichunt.com http://www.youtube.com;
   style-src 'self' 'unsafe-inline';
-  img-src * blob: data:;
-  media-src *.s3.amazonaws.com;
-  connect-src *;
+  img-src * blob: data: statichunt.com;
+  media-src 'self' *.s3.amazonaws.com;
+  connect-src * statichunt.com;
   font-src 'self';
-  frame-src giscus.app
-`
+  frame-src giscus.app https://www.youtube.com/ https://www.youtube-nocookie.com/
+`;
 
 const securityHeaders = [
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
@@ -41,11 +28,6 @@ const securityHeaders = [
     value: 'strict-origin-when-cross-origin',
   },
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
-  {
-    key: 'X-Frame-Options',
-    value: 'DENY',
-  },
-  // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
   {
     key: 'X-Content-Type-Options',
     value: 'nosniff',
@@ -65,11 +47,7 @@ const securityHeaders = [
     key: 'Permissions-Policy',
     value: 'camera=(), microphone=(), geolocation=()',
   },
-]
-
-const output = process.env.EXPORT ? 'export' : undefined
-const basePath = process.env.BASE_PATH || undefined
-const unoptimized = process.env.UNOPTIMIZED ? true : undefined
+];
 
 /**
  * @type {import('next/dist/next-server/server/config').NextConfig}
@@ -87,6 +65,7 @@ module.exports = () => {
         {
           protocol: 'https',
           hostname: 'picsum.photos',
+          pathname: '**',
         },
       ],
     },
@@ -103,23 +82,6 @@ module.exports = () => {
         test: /\.svg$/,
         use: ['@svgr/webpack'],
       })
-
-      config.module.rules.push({
-        test: /\.node/,
-        use: {
-          loader: 'raw-loader',
-        },
-      })
-      config.plugins.push(
-        new CopyPlugin({
-          patterns: [
-            {
-              from: require.resolve('pdfjs-dist/build/pdf.worker.min.js'),
-              to: path.join(__dirname, 'public/static/js'),
-            },
-          ],
-        })
-      )
 
       return config
     },
