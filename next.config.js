@@ -7,6 +7,15 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 const path = require('path')
 const CopyPlugin = require('copy-webpack-plugin')
 
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  i18n: {
+    locales: ['en', 'zh'],
+    defaultLocale: 'en',
+  },
+}
+
+module.exports = nextConfig
 
 // You might need to insert additional domains in script-src if you are using external services
 const ContentSecurityPolicy = `
@@ -62,7 +71,6 @@ const output = process.env.EXPORT ? 'export' : undefined
 const basePath = process.env.BASE_PATH || undefined
 const unoptimized = process.env.UNOPTIMIZED ? true : undefined
 
-
 /**
  * @type {import('next/dist/next-server/server/config').NextConfig}
  **/
@@ -112,7 +120,6 @@ module.exports = () => {
           ],
         })
       )
-
 
       return config
     },
