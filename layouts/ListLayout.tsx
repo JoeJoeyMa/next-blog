@@ -45,7 +45,8 @@ const item = {
 
 export default function ListLayoutWithTags({ params: { locale }, posts, title }: ListLayoutProps) {
   const { t } = useTranslation(locale, 'home')
-  const [currentPage, setCurrentPage] = useState(1)
+  const savedPage = sessionStorage.getItem('currentPage');
+  const [currentPage, setCurrentPage] = useState(savedPage ? parseInt(savedPage) : 1);
   const postsPerPage = POSTS_PER_PAGE
   const sortedPosts = sortByDate(posts)
   const setSelectedTag = useTagStore((state) => state.setSelectedTag)

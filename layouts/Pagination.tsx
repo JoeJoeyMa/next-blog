@@ -19,13 +19,15 @@ export default function Pagination({
 
   const handlePrevPage = () => {
     if (prevPage) {
-      onPageChange(currentPage - 1)
+      sessionStorage.setItem('currentPage', (currentPage - 1).toString());
+      onPageChange(currentPage - 1);
     }
   }
 
   const handleNextPage = () => {
     if (nextPage) {
-      onPageChange(currentPage + 1)
+      sessionStorage.setItem('currentPage', (currentPage + 1).toString());
+      onPageChange(currentPage + 1);
     }
   }
 

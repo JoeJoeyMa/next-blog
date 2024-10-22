@@ -21,7 +21,7 @@ const Settings: React.FC<SettingsProps> = ({ t, handleThemeChange, handleLinkCli
     <div className="my-auto mb-20 mt-10 flex max-h-[230px] flex-col space-y-4 overflow-y-auto">
       <div className="ml-4 text-3xl font-semibold text-primary-400">{t('language')}</div>
       <LangButton t={t} handleLinkClick={handleLinkClick} locale={fallbackLng} lang="english" />
-      <LangButton t={t} handleLinkClick={handleLinkClick} locale={secondLng} lang="french" />
+      <LangButton t={t} handleLinkClick={handleLinkClick} locale={secondLng} lang="中文" />
       <div className="ml-4 text-3xl font-semibold text-primary-400">{t('theme')}</div>
       <ThemeButton t={t} handleThemeChange={handleThemeChange} theme="light" Icon={Sun} />
       <ThemeButton t={t} handleThemeChange={handleThemeChange} theme="dark" Icon={Moon} />
