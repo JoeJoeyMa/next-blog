@@ -28,11 +28,7 @@ const ThemeSwitch = () => {
 
   useOuterClick(menubarRef, () => setMenuOpen(false))
 
-  useEffect(() => {
-    setDarkModeChecked(
-      theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
-    );
-  }, [theme]);
+  useEffect(() => {    setDarkModeChecked(      theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)    );  }, [theme]);
 
   const handleThemeChange = (newTheme: string) => {
     setTheme(newTheme)

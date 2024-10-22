@@ -1,9 +1,9 @@
 {
-  "mail": "Adresse Mail",
-  "title": "Abonnez-vous à la newsletter",
-  "messageError": "Votre adresse e-mail est invalide ou  déjà inscrite !",
-  "placeholderSuccess": "Vous êtes inscrit ! 🎉",
-  "placeholderDefault": "Entrez votre adresse mail",
-  "buttonSuccess": "Merci !",
-  "buttonDefault": "S'inscrire"
+  "mail": "电子邮件地址",
+  "title": "订阅新闻通讯",
+  "messageError": "您的电子邮件地址无效或已注册！",
+  "placeholderSuccess": "您已订阅！🎉",
+  "placeholderDefault": "输入您的电子邮件地址",
+  "buttonSuccess": "谢谢！",
+  "buttonDefault": "订阅"
 }
