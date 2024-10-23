@@ -1,0 +1,139 @@
+---
+title: 'React Source Code Debugging Techniques'
+date: '2024-07-30 19:23:18'
+# lastmod: '1900-01-01'
+tags: ['react','vite']
+authors: ['MASON']
+language: cn
+draft: false
+summary: "Possibly the simplest and most elegant Vite-based React source code debugging technique. Want to check out this step-by-step tutorial? 👻"
+images: []
+layout: PostLayout
+---
+
+Why am I writing this article? Because I wanted to debug React source code using a project based on `vite` rather than one created with `cra`. I couldn't find this combination online, so I decided to do it myself. As a result, I encountered some pitfalls, which I must record. Who knows, it might help someone else 😄.
+
+## Download the Source Code
+
+The target is React version `v18.2.0`. Simply download the corresponding tag. [^1]
+
+```sh
+g cloneb v18.2.0 https://github.com/facebook/react.git
+```
+
+## Install Dependencies
+
+When installing dependencies, you're likely to encounter the following issues 🐞:
+
+- `gifsicle: Command failed`, because React's dependencies rely on the `autoconf` package. First, use `homebrew` to install it (for macOS, I'm not sure about Windows)
+    ```sh
+    brew install autoconf automake libtool
+    ```
+- `electron: Command failed`, an Electron mirror source issue. You need to set a usable mirror source. The Taobao mirror found online is outdated (I couldn't find the latest one), but I discovered that Huawei's works well
+    ```sh
+    yarn config set electron_mirror https://mirrors.huaweicloud.com/electron/
+    ```
+
+## Compilation Preparation
+
+We need to modify the packaging configuration `react/scripts/rollup/build.js/getRollupOutputOptions`. First, enable `sourcemap` for easy source code tracking, and second, comment out several plugins to prevent compilation errors:
+
+```ts
+// Core: source code mapping
+sourcemap: true
+// Comment out the following plugins, otherwise compilation will throw errors
+// 1. transform removes 'use strict' from files
+// 2. closure compresses code in production environment
+// 3. prettier formats and beautifies
+// 4. renderChunk adds header code like license
+// 5. stripUnusedImports removes unused imports
+```
+
+## Start Compilation
+
+```sh
+yarn build --type=NODE
+# Of course, you can choose to compile only these parts
+yarn build react/index,react/jsx,react-dom/index,scheduler --type=NODE
+```
+
+After compilation, create global symlinks for use in later projects. Enter the `build/react` and `build/react-dom` directories respectively:
+```sh
+pnpm link -g
+# View the global symlinks created by pnpm
+pnpm list -g --depth 0
+```
+
+## Link to Project
+
+I created the project using `@twotwoba/mk-app-cli`[^2]. Before using `pnpm link` to import the compiled `react` and `react-dom` into the project, first modify the project configuration:
+- `package.json`
+    ```diff
+    {
+        "dependencies": {
+    -    "react": "^18.2.0",
+    -    "react-dom": "^18.2.0",
+        }
+    }
+    ```
+
+- `vite.config.ts`
+    ```diff
+    build: {
+        rollupOptions: {
+    +       external: ['react', 'react-dom']
+            output: {
+    +            globals: {
+    +                react: 'React',
+    +                'react-dom': 'ReactDOM'
+    +            }
+            }
+        }
+    }
+    ```
+
+After installing the dependencies for the project, use pnpm to reference the global symlinks:
+```sh
+pnpm i
+pnpm link -g react react-dom
+```
+
+## Start Debug Mode
+
+For details, see [VSCode official debugging](https://code.visualstudio.com/docs/editor/debugging). I won't elaborate further.
+
+1. First, start the project `pnpm run dev`
+2. Enter VSCode's debug panel, create `launch.json`, as follows:
+    ```json
+    {
+        "type": "chrome",
+        "request": "launch",
+        "name": "Debug React Source Code",
+        "url": "http://localhost:7788", // Configure the port according to your project
+        "webRoot": "${workspaceFolder}"
+    }
+    ```
+    After configuration, press `F5` or click the start button to enter debug mode. Then you can freely set breakpoints in VSCode and trace the source code according to the call stack 😄.
+
+## Icing on the Cake
+
+Actually, with the above steps, you can already debug React source code smoothly in VSCode, but there are two shortcomings:
+1. The source code file located through the call stack is not the React source file we cloned
+2. You can't add bookmarks 🔖 using the `Bookmarks` plugin in the located source code
+
+To solve these two problems, we need to make slight modifications to the above steps.
+
+- Put the cloned `React source code` and the `project used for debugging` in the same folder. The purpose of this is to make them in the same `workspace`
+- In this directory, create a new `launch.json`, modify as follows
+   ```diff
+   {
+   -     "webRoot": "${workspaceFolder}"
+   +     "webRoot": "${workspaceFolder}/YourProject"
+   }
+   ```
+
+Finally, let's start the project again and open debug mode. If all goes well, when you click on the call stack, you can directly locate the React source code file. Great job 🎉
+
+> The principle is simple: as long as the sourcemap is effective and the mapped file is under the current workspace, VSCode will open the corresponding file
+
+---

@@ -1,0 +1,150 @@
+---
+title: '优先队列'
+date: '2022-10-25'
+# lastmod: '1900-01-01'
+tags: ['data structure', 'algorithm', 'javascript', 'react']
+authors: ['MASON']
+language: en
+draft: false
+summary: 'react 调度算法使用的小顶堆 minHeap 就是一个优先队列.'
+images: []
+layout: PostLayout
+---
+
+JavaScript 中没有内置优先队列这个数据结构，需要自己来实现一下~👻
+
+```javascript
+class PriorityQueue {
+    constructor(data = [], compare) {
+        this.queue = data
+        this.compare = compare
+        for (let i = this.queue.length >> 1; i >= 0; --i) this.down(i)
+    }
+    up(i) {
+        while (i > 0) {
+            const parent = (i - 1) >> 1
+            if (this.compare(this.queue[parent], this.queue[i])) {
+                this.swap(i, parent)
+                i = parent
+            } else {
+                break
+            }
+        }
+    }
+    down(i) {
+        while (i < this.size() >> 1) {
+            let leftIndex = 2 * i + 1
+            let rightIndex = leftIndex + 1
+
+            let temp = i
+            if (this.compare(this.queue[temp], this.queue[leftIndex])) {
+                temp = leftIndex
+            }
+            if (this.compare(this.queue[temp], this.queue[rightIndex])) {
+                temp = rightIndex
+            }
+            if (i !== temp) {
+                this.swap(i, temp)
+                i = temp
+            } else {
+                break
+            }
+        }
+    }
+    peek() {
+        return this.queue[0]
+    }
+    push(val) {
+        this.up(this.queue.push(val) - 1)
+    }
+    pop() {
+        this.swap(0, this.size() - 1)
+        const top = this.queue.pop()
+        this.down(0)
+        return top
+    }
+    size() {
+        return this.queue.length
+    }
+    swap(i, j) {
+        const temp = this.queue[i]
+        this.queue[i] = this.queue[j]
+        this.queue[j] = temp
+    }
+}
+```
+
+测试：
+
+```js
+const pq = new PriorityQueue([4, 2, 3, 5, 6, 1, 7, 8, 9], (a, b) => a - b > 0)
+console.log('📌📌📌 ~ pq', pq)
+console.log(pq.poll())
+console.log(pq.poll())
+console.log(pq.poll())
+pq.push(10)
+pq.push(20)
+console.log(pq.poll())
+console.log(pq.poll())
+console.log(pq.poll())
+console.log(pq.poll())
+```
+
+---
+
+递归版本的 down，up，另外使用了堆顶守卫简化
+
+-   精髓之一：**数组的第一个索引 0 空着不用**
+-   精髓之二：插入或者删除元素的时候，需要元素自动排序
+
+```js
+class PriorityQueue {
+    constructor(data, cmp) {
+        // 使用堆顶守卫，更方便上浮时父节点的获取 p = i >> 1, 子节点本身就比较好获取倒是无所谓
+        this.data = [null, ...data]
+        this.cmp = cmp
+        for (let i = this.data.length >> 1; i > 0; --i) this.down(i) // 对除最后一层的子节点进行堆化初始化
+    }
+    get size() {
+        return this.data.length - 1
+    }
+    swap(i, j) {
+        ;[this.data[i], this.data[j]] = [this.data[j], this.data[i]]
+    }
+    // 递归上浮和下沉
+    down(i) {
+        if (i === this.size) return
+        const j = i
+        const l = i << 1
+        const r = l + 1
+        if (l <= this.size && this.cmp(this.data[i], this.data[l])) i = l
+        if (l <= this.size && this.cmp(this.data[i], this.data[r])) i = r
+        if (i !== j) {
+            this.swap(i, j)
+            this.down(i)
+        }
+    }
+    up(i) {
+        if (i === 1) return
+        const p = i >> 1
+        if (this.cmp(this.data[p], this.data[i])) {
+            this.swap(p, i)
+            this.up(p)
+        }
+    }
+    push(val) {
+        this.up(this.data.push(val) - 1) // 加入队列后进行上浮处理
+    }
+    poll() {
+        this.swap(1, this.size) // 先交换首尾，方便后面出队
+        const top = this.data.pop()
+        this.down(1)
+        return top
+    }
+}
+```
+
+使用场景：
+
+-   lc.23 合并 K 个有序链表
+-   堆排序也有其中的思想

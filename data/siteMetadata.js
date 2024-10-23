@@ -5,34 +5,32 @@ const siteMetadata = {
   headerTitle: 'MASON',
   avatar: '/static/images/avatar.png',
   description: '',
-  language: 'en-us',
+  language: 'en',
   theme: 'system', // system, dark or light
   siteUrl: 'https://joey.gq',
   siteRepo: 'https://github.com/JoeJoeyMa', // TODO
   siteLogo: '/static/images/logo.png',
   socialBanner: '/static/images/twitter-card.png',
-  // mastodon: 'https://mastodon.social/@mastodonuser',
+  mastodon: 'https://mastodon.social/@mastodonuser',
   email: 'joejoey.ma@gmail.com',
   github: 'https://github.com/JoeJoeyMa',
   x: 'https://x.com/JoeyJoeMA',
-  // facebook: 'https://facebook.com',
-  // youtube: 'https://youtube.com',
-  // linkedin: 'https://www.linkedin.com',
-  // threads: 'https://www.threads.net',
-  // instagram: 'https://www.instagram.com',
+  // twitter: 'https://twitter.com/Twitter',
+  facebook: 'https://facebook.com',
+  youtube: 'https://youtube.com',
+  linkedin: 'https://www.linkedin.com',
+  threads: 'https://www.threads.net',
+  instagram: 'https://www.instagram.com',
   locale: 'en-US',
-  openToWork: true,
+  multiauthors: true,
   analytics: {
     // If you want to use an analytics provider you have to add it to the
     // content security policy in the `next.config.js` file.
     // supports Plausible, Simple Analytics, Umami, Posthog or Google Analytics.
-    umamiAnalytics: {
+    /*umamiAnalytics: {
       // We use an env variable for this site to avoid other users cloning our analytics ID
-      // umamiWebsiteId: process.env.NEXT_UMAMI_ID, // e.g. 123e4567-e89b-12d3-a456-426614174000
-      // You may also need to overwrite the script if you're storing data in the US - ex:
-      // src: 'https://us.umami.is/script.js'
-      // Remember to add 'us.umami.is' in `next.config.js` as a permitted domain for the CSP
-    },
+      umamiWebsiteId: process.env.NEXT_UMAMI_ID, // e.g. 123e4567-e89b-12d3-a456-426614174000
+    },*/
     // plausibleAnalytics: {
     //   plausibleDataDomain: '', // e.g. tailwind-nextjs-starter-blog.vercel.app
     // },
@@ -47,8 +45,9 @@ const siteMetadata = {
   newsletter: {
     // supports mailchimp, buttondown, convertkit, klaviyo, revue, emailoctopus
     // Please add your .env file and modify it according to your selection
-    // provider: 'buttondown',
+    provider: 'buttondown',
   },
+  iscomments: true,
   comments: {
     // If you want to use an analytics provider you have to add it to the
     // content security policy in the `next.config.js` file.
@@ -93,6 +92,13 @@ const siteMetadata = {
     //   indexName: 'docsearch',
     // },
   },
+  // formspree support :
+  //if set to false, simple "mailto"
+  // if set to true, get a free account there : https://formspree.io/ and go to read.me doc
+  formspree: true,
+  // waline support
+  iswaline: false,
+  walineServer: '',
 }
 
 module.exports = siteMetadata

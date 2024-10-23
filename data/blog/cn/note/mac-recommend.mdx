@@ -1,0 +1,193 @@
+---
+title: 'Make mac awesome'
+date: '2022-09-13'
+# lastmod: '1900-01-01'
+tags: ['mac']
+authors: ['MASON']
+language: cn
+draft: false
+summary: '根据个人使用经验, 记录了一些在 Mac 上常用且高效的软件和配置.'
+images: []
+layout: PostLayout
+---
+
+**工欲善其事, 必先利其器 🥷**
+
+_说明: 全是个人的使用习惯, 不一定适合每个人, 如你有更好的提效工具或技巧, 欢迎留言 👏🏻_
+
+## 软件推荐
+
+### Homebrew [官网地址](https://brew.sh/)
+
+没有🪜或者懒得折腾的直接使用国内大神的脚本傻瓜式安装:
+
+```sh
+# 按照提示操作下去即可
+/bin/zsh -c "$(curl -fsSL https://gitee.com/cunkai/HomebrewCN/raw/master/Homebrew.sh)"
+```
+
+按照官网的步骤安装也可, 但是在村里最好还是替换一下镜像源:
+
+```sh
+# 替换brew.git
+cd "$(brew --repo)"
+git remote set-url origin https://mirrors.cloud.tencent.com/homebrew/brew.git
+# 替换homebrew-core.git
+cd "$(brew --repo)/Library/Taps/homebrew/homebrew-core"
+git remote set-url origin https://mirrors.cloud.tencent.com/homebrew/homebrew-core.git
+```
+
+### oh-my-zsh [官网地址](https://ohmyz.sh/)
+
+修改 `~/.zshrc` 部分配置：
+
+```sh
+# zsh theme；default robbyrussell, prefer miloshadzic
+ZSH_THEME="miloshadzic"
+# plugins cd ~/.oh-my-zsh/plugins
+plugins=(
+  # 默认的,配置了很多别名 ~/.oh-my-zsh/plugins/git/git.plugin.zsh
+  git
+  # 语法高亮
+  # https://github.com/zsh-users/zsh-syntax-highlighting/blob/master/INSTALL.md#oh-my-zsh
+  zsh-syntax-highlighting
+  # 输入命令的时候给出提示
+  # https://github.com/zsh-users/zsh-autosuggestions/blob/master/INSTALL.md#oh-my-zsh
+  zsh-autosuggestions
+)
+
+# 让terminal标题干净
+DISABLE_AUTO_TITLE="true"
+```
+
+### alfred(花了米支持,架不住raycast颜值更讨我喜欢)
+
+<details>
+<summary>用 alfred 的兄弟</summary>
+
+~~懂得都懂, mac 上的效率神器, 剪贴板、搜索引擎、自动化工作流等等就不多说了。~~
+
+~~就分享一下平时使用的插件：~~
+
+~~- [VsCode 快速打开项目](https://github.com/alexchantastic/alfred-open-with-vscode-workflow), 别再用手拖了, 直接`code 文件夹名` 不香嘛~~
+
+~~- [CodeVar](https://github.com/xudaolong/CodeVar), 作为程序员起名字是个头疼事, 交给它 👈🏻~~
+
+~~- [markdown table](https://github.com/crispgm/alfred-markdown-table), 用 vscode 写 markdown 我想只有 table 最让人苦恼了吧哈哈~~
+
+~~- [alfred-github-repos](https://github.com/edgarjs/alfred-github-repos), github 快捷搜索~~
+
+</details>
+
+### Raycast [官网地址](https://www.raycast.com/)
+
+`Raycast` 的高颜值、丰富的插件、澎湃的活力, 并且集成了 **AI**, 让我毫不犹豫的投入了它的怀抱。
+
+插件推荐（直接 store 里搜即可）：
+
+- Visual Studio Code, 快速打开访问过的项目
+- Easy Dictionary, 目前用过最好用的翻译了(可以看见音标)
+- IP-Geolocation, 查询 IP
+- Github, 都懂
+- Port Manager, 管理端口进程
+- Antd, 方便直接搜索 antd 的组件
+- change case, 快捷切换蛇形、驼峰等命名
+
+### Karabiner Elements [官网下载](https://karabiner-elements.pqrs.org/)
+
+用这个软件我是为了使用 F19 键,来丰富我的快捷键操作, 真的大爱💘
+
+点击 [Change right_command to F19](https://ke-complex-modifications.pqrs.org/?q=F19)。进入页面后, 直接 `import`, 然后到 `Karabiner Elements` 的 `complex modifications` 内添加规则即可。
+
+不得不说体验真的完美啊~~~ 🥳
+
+### 其他软件
+
+- `clashX`, 🪜, 由于不可知原因, github 仓库已经无了~自行谷歌下载吧(别存云盘, 也会被和谐😭)
+- `iShot Pro`, 截图、贴图软件, 功能较全, 目前为止很好用,
+- `keka`, 目前用过的 mac 上最好用的解压缩软件, [官网下载](https://www.keka.io/en/)(免费), AppStore 下载(付费)
+- `IINA`, 干净好用的播放器, [下载地址](https://iina.io/)
+- `Downie 4`, 下载视频神器, [下载地址](https://software.charliemonroe.net/downie/), 这个我支持了正版~
+- `PicGo`, 图床工具 [github 地址](https://github.com/Molunerfinn/PicGo)
+- `Dash`, 汇集了计算机的各种文档, 配合 raycast 查起来特别方便, [下载地址](https://kapeli.com/dash), 这个我也支持了正版~
+- `AppCleaner`, 干净卸载软件, 这个更较小, 支持 M1（推荐）, [下载地址](https://freemacsoft.net/appcleaner/)。（更新：用了 raycast 后, 此软件好像有点多余了哈哈）
+
+## 字体
+
+强迫症, 个人目前最喜欢的字体是 `inconsolata`, 可以保证两个英文和一个汉字对齐.  
+[点击下载 inconsolata](https://fonts.google.com/specimen/Inconsolata), 拖进 mac 的 Font Book 即可.
+
+喜欢连体字的可以使用比较热门的 `Fira Code`, [下载安装 github](https://github.com/tonsky/FiraCode) 或:
+
+```sh
+brew tap homebrew/cask-fonts
+brew install --cask font-fira-code
+```
+
+## vim 配置
+
+个人习惯了 mac 快捷键 `ctrl + f/b/a/e/n/p`, `vim` 在插入模式下, 鼠标光标的控制`hjkl`不适合我, 好在可以修改配置解决：
+
+```sh
+# vim ~/.vimrc
+syntax on      "语法高亮"
+set number     "显示行号"
+set cursorline "高亮光标所在行"
+set autoindent "回车缩进跟随上一行"
+set showmatch  "高亮显示匹配的括号([{和}])"
+
+"配置插入模式快捷键"
+inoremap <C-f> <Right>
+inoremap <C-b> <Left>
+inoremap <C-a> <Home>
+inoremap <C-e> <End>
+inoremap <C-k> <Up>
+inoremap <C-l> <Down>
+inoremap <C-q> <PageUp>
+inoremap <C-z> <PageDown>
+```
+
+## 前端开发环境配置
+
+### fnm [github](https://github.com/Schniz/fnm)
+
+之前有用过一段时间 `nvm`, 后来某次冲浪发现 nvm 制造的锅 -- 每次打开terminal会等待一会儿.
+
+再后来发现了 `fnm` 这个好东西, `Rust` 打造, 相信前端一听到这个大名就一个反应, 快！
+
+```sh
+brew install fnm
+
+# 根据官网提示, 把下方代码贴进对应shell配置文件 .zshrc
+eval "$(fnm env --use-on-cd)"
+
+fnm install version # 安装不同版本node
+fnm default version # 设置默认node
+fnm use version     # 临时使用node
+
+fnm ls              # 查看本地已安装 node
+fnm ls-remote       # 查看远程可安装版本
+```
+
+### nrm
+
+```sh
+npm i nrm -g
+# nrm 常用命令
+nrm ls
+nrm use
+nrm add <name> <url> # 添加新的镜像源(比如公司的私有源)
+nrm del <name>
+```
+
+### Monokai pro license
+
+```js
+// 网上搜到的, 有钱的兄弟还是要支持正版!
+id@chinapyg.com
+d055c-36b72-151ce-350f4-a8f69
+```
+
+---
+
+看完本文, 你有什么高效的小技巧推荐呢? 欢迎路过的兄弟留言补充! 👏🏻👏🏻👏🏻

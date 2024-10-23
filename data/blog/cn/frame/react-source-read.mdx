@@ -1,0 +1,663 @@
+---
+title: 'React 源码阅读（v18.2.0）'
+date: '2024-07-31 18:23:18'
+# lastmod: '1900-01-01'
+tags: ['react']
+authors: ['MASON']
+language: cn
+draft: false
+summary: "也是一个 React 使用了 4 年的选手了，想当出自己咬牙啃 React 源码一知半解，后来看了很多大佬的文章颇有收获，忙里偷闲，温故而知新一下下，let's go🧨"
+images: []
+layout: PostLayout
+---
+
+## Overview
+
+<TOCInline toc={props.toc} exclude="Overview" toHeading={3} />
+
+---
+
+## 前置
+
+
+
+## 宏观基础概念
+
+四个关键包：
+- `react`，对外暴露 API，只提供定义 react 组件的必要函数，如 `ReactElement`
+- `react-dom`，渲染器，承担`启动 react 渲染流程`和`把 reconciler 构造出来的 fiber 树表现出来的`作用（生成 dom 节点(浏览器中), 生成字符串(ssr)）
+- `react-reconciler`，综合协调另外三个包
+    - 接收 `react-dom` （初次 render） 和 `react` （后续 setState） 引起的更新
+    - 把构造 fiber 树的过程包装在一个回调函数中，并将此回调函数传入 `scheduler` 等待调度。回调函数：`performSyncWorkOnRoot/performConcurrentWorkOnRoot`
+- `scheduler`，顾名思义这个包起到了调度的作用，控制着从 `reconciler` 传入的回调函数的执行时机，`concurrent` 模式下可以实现任务分片
+
+## 核心抽象理念
+
+- `双缓存`，在 React 中最多同时存在两个 Fiber 🌲
+  - 当前屏幕显示内容对应的 Fiber 树，`current Fiber 树`
+  - 发生更新，正在内存中构建的 Fiber 树，`workInProgress Fiber 树`  
+
+  根 `fiberRootNode` 的 `current` 指针在不同 Fiber 树的 `rootFiber` 之间切换 --- 当 workInProgress Fiber 树构建完成交给渲染器渲染到页面后，current 指针就切换到 workInProgress Fiber 树，它也转变为 current Fiber 树了（长大后我就成了你）~
+- `双循环`，
+  - 调度循环
+  - 构建循环
+---
+
+## 启动过程
+
+![createRoot](/static/images/react/ReactDomRoot.png)
+
+上图是一个 React 项目启动的基本流程，通过调试源码，理解起来相对较容易。
+
+- `createRoot`，主要使命创建了 `FiberRoot` 和 `HostFiberRoot`，两者的连接见图
+    - `FiberRoot` 主要存储了构建 `Fiber` 过程中的全局状态
+    - `HostRootFiber` 是第一个 `Fiber` 节点，`markContainerAsRoot` 将它和 `container` 关联起来了
+- `render`，是 `ReactDOMRoot` 对象原型上的方法，内部调用了 `updateContainer->scheduleUpdateOnFiber` 进入协调流程
+
+
+目前，我们清楚的知道 `react-dom` 包作为**渲染器**初始启动的大体流程。
+
+## 协调过程
+
+`scheduleUpdateOnFiber` 是 `react-reconciler` 核心的入口，在 `ReactFiberWorkLoop.js` 文件中。
+
+![reconciler](/static/images/react/reconciler.png)
+
+```js:scheduleUpdateOnFiber
+export function scheduleUpdateOnFiber(
+  root: FiberRoot,
+  fiber: Fiber,
+  lane: Lane,
+  eventTime: number,
+) {
+  // 把更新的 lane 和 eventTime 挂载到 fiberRoot 对应的属性上pendingLanes和eventTimes
+  // Mark that the root has a pending update.
+  markRootUpdated(root, lane, eventTime);
+
+  // 字面翻译：执行上下文包含渲染上下文，并且 workInProgressRoot 为当前 FiberRoot
+  // 个人理解: 这里的逻辑就是处理渲染过程中的更新
+  if ((executionContext & RenderContext) !== NoLanes && root === workInProgressRoot) {
+    // 追踪渲染阶段的 lane
+    // Track lanes that were updated during the render phase.
+    workInProgressRootRenderPhaseUpdatedLanes = mergeLanes(
+      workInProgressRootRenderPhaseUpdatedLanes,
+      lane,
+    );
+  } else {
+    if (root === workInProgressRoot) {
+      if (workInProgressRootExitStatus === RootSuspendedWithDelay) {
+        markRootSuspended(root, workInProgressRootRenderLanes);
+      }
+    }
+    // ...
+    /**
+     * 重点：reconciler 与 scheduler 交互的入口。这个方法的作用是去调度中心注册任务，等待回调执行
+     */
+    ensureRootIsScheduled(root, eventTime);
+    // ...
+  }
+}
+```
+```js:ensureRootIsScheduled
+function ensureRootIsScheduled(root: FiberRoot, currentTime: number) {
+  // FiberRoot.callbackNode 的是由 Scheduler.scheduleCallback 返回的 Node，代表着下一次将要执行的渲染任务
+  const existingCallbackNode = root.callbackNode;
+
+  // 被其他高优先级工作“饿死”的 lane 进行标记，以便在下次调度时优先处理这些 lane
+  markStarvedLanesAsExpired(root, currentTime);
+
+  // Determine the next lanes to work on, and their priority.
+  const nextLanes = getNextLanes(
+    root,
+    root === workInProgressRoot ? workInProgressRootRenderLanes : NoLanes,
+  );
+
+  // ...
+  
+  // 取出 nextLanes 中的最高优先级（lanes & -lanes）
+  const newCallbackPriority = getHighestPriorityLane(nextLanes);
+
+  // fiberRoot 上的回调优先级如果和新的最高优先级相同，直接复用
+  const existingCallbackPriority = root.callbackPriority;
+  if (existingCallbackPriority === newCallbackPriority) {
+    return;
+  }
+
+  // 优先级不同且回调节点存在，则取消该回调，并且后续 schedule 一个新的回调任务
+  if (existingCallbackNode != null) {
+    cancelCallback(existingCallbackNode);
+  }
+
+  // Schedule a new callback.
+  let newCallbackNode;
+  // 本地调度优先级最高的lane 是 SyncLne，则走「同步调度」，否则走 「异步调度」
+  if (newCallbackPriority === SyncLane) {
+    // 调用 scheduleSyncCallback，把 performSyncWorkOnRoot.bind(null, root) 回调函数装载到 syncQueue 队列中
+    // 支持微任务就 flushSyncCallbacks 把 syncQueue 中的回调执行完，否则调用 scheduleCallback(ImmediatePriority, flushSyncCallbacks)
+    // 赋予 ImmediateSchedulerPriority 即立即调度的优先级
+  } else {
+    // 非同步下，要将 lanes 转化为调度的优先级
+    let schedulerPriorityLevel;
+    switch (lanesToEventPriority(nextLanes)) {
+      case DiscreteEventPriority:
+        schedulerPriorityLevel = ImmediateSchedulerPriority;
+        break;
+      case ContinuousEventPriority:
+        schedulerPriorityLevel = UserBlockingSchedulerPriority;
+        break;
+      case DefaultEventPriority:
+        schedulerPriorityLevel = NormalSchedulerPriority;
+        break;
+      case IdleEventPriority:
+        schedulerPriorityLevel = IdleSchedulerPriority;
+        break;
+      default:
+        schedulerPriorityLevel = NormalSchedulerPriority;
+        break;
+    }
+    newCallbackNode = scheduleCallback(
+      schedulerPriorityLevel,
+      performConcurrentWorkOnRoot.bind(null, root),
+    );
+  }
+  // 挂载新的回调优先级和回调节点到 fiberRoot 上
+  root.callbackPriority = newCallbackPriority;
+  root.callbackNode = newCallbackNode;
+}
+```
+
+此处的 `scheduleCallback` 引用的 `Scheduler.unstable_scheduleCallback` 方法，在后面的调度过程详细分析，先着重分析一下 `performSyncWorkOnRoot/performConcurrentWorkOnRoot`.
+
+```js:performSyncWorkOnRoot
+function performSyncWorkOnRoot(root) {
+  // ...部分代码省略
+
+  // 处理 passive effect（即触发 useEffect 的创建、销毁函数及其他同步任务）
+  flushPassiveEffects();
+
+  let lanes = getNextLanes(root, NoLanes);
+  // 如果没有需要处理的任务，直接返回
+  if (!includesSomeLane(lanes, SyncLane)) {
+    ensureRootIsScheduled(root, now());
+    return null;
+  }
+
+  // 构建 fiber 树
+  let exitStatus = renderRootSync(root, lanes);
+
+  // ...根据 exitStatus 做一些异常处理代码省略
+
+  // 渲染 fiber 树
+  const finishedWork: Fiber = (root.current.alternate: any);
+  root.finishedWork = finishedWork;
+  root.finishedLanes = lanes;
+  // 进入 commit 阶段
+  commitRoot(
+    root,
+    workInProgressRootRecoverableErrors,
+    workInProgressTransitions,
+  );
+
+  // 退出前再次检测是否有其他更新
+  ensureRootIsScheduled(root, now());
+
+  return null;
+}
+```
+```js:performConcurrentWorkOnRoot
+function performConcurrentWorkOnRoot(root, didTimeout) {
+  // ...部分代码省略
+  // 当前在 React 事件中可以清除当前事件时间，下一次更新将计算新的事件时间
+  currentEventTime = NoTimestamp;
+  currentEventTransitionLane = NoLanes;
+  
+  const originalCallbackNode = root.callbackNode;
+  // 处理 passive effect（即触发 useEffect 的创建、销毁函数及其他同步任务）
+  const didFlushPassiveEffects = flushPassiveEffects();
+  if (didFlushPassiveEffects) {
+    if (root.callbackNode !== originalCallbackNode) {
+      return null;
+    } else {
+      // Current task was not canceled. Continue.
+    }
+  }
+
+  // 获取下一个要处理的 lanes
+  let lanes = getNextLanes(
+    root,
+    root === workInProgressRoot ? workInProgressRootRenderLanes : NoLanes,
+  );
+  // 永远不会执行
+  if (lanes === NoLanes) {
+    return null;
+  }
+
+  // 是否开启时间分片
+  const shouldTimeSlice =
+    !includesBlockingLane(root, lanes) &&
+    !includesExpiredLane(root, lanes) &&
+    (disableSchedulerTimeoutInWorkLoop || !didTimeout);
+
+  // 构建 fiber 树
+  let exitStatus = shouldTimeSlice
+    ? renderRootConcurrent(root, lanes)
+    : renderRootSync(root, lanes);
+
+  // 检查退出状态
+  if (exitStatus !== RootInProgress) {
+    // ...根据 exitStatus 做一些异常处理代码省略
+    
+    // 渲染未完成 挂起
+    if (exitStatus === RootDidNotComplete) {
+      markRootSuspended(root, lanes);
+    } else {
+      // 渲染完成
+      const renderWasConcurrent = !includesBlockingLane(root, lanes);
+      const finishedWork: Fiber = (root.current.alternate: any);
+      if (
+        renderWasConcurrent &&
+        !isRenderConsistentWithExternalStores(finishedWork) // 判断 store 是否一致
+      ) {
+        // A store was mutated in an interleaved event. Render again,
+        // synchronously, to block further mutations.
+        exitStatus = renderRootSync(root, lanes);
+        // ...根据 exitStatus 做一些异常处理代码省略
+      }
+
+      // We now have a consistent tree. The next step is either to commit it,
+      // or, if something suspended, wait to commit it after a timeout.
+      root.finishedWork = finishedWork;
+      root.finishedLanes = lanes;
+
+      // 完成并发渲染的后续处理（即进入 commit 阶段）
+      finishConcurrentRender(root, exitStatus, lanes);
+    }
+  }
+
+  // 退出前再次检测是否有其他更新
+  ensureRootIsScheduled(root, now());
+
+  // * 判断 callbackNode 是否和缓存值一致，来确定是否是被打断的任务
+  if (root.callbackNode === originalCallbackNode) {
+    // * 渲染被打断，返回一个新的 performConcurrentWorkOnRoot 等待下一次调度
+    // * 即 Scheduler  workLoop 中 task.callback 执行完返回的 continuationCallback
+    return performConcurrentWorkOnRoot.bind(null, root);
+  }
+  return null;
+}
+```
+
+### render 阶段
+
+`renderRootSync/renderRootConcurrent` 分别是同步构造、并发构造 `workInProgressRoot` 树的方法，接着看
+
+```js:renderRoot
+function renderRootSync(root: FiberRoot, lanes: Lanes) {
+  // 保存当前执行上下文
+  const prevExecutionContext = executionContext
+  // 设置当前执行上下文为 render 上下文
+  executionContext |= RenderContext
+  const prevDispatcher = pushDispatcher()
+
+  // 判断是否需要创建新的 workInProgressRoot 树
+  if (workInProgressRoot !== root || workInProgressRootRenderLanes !== lanes) {
+    // ... 部分代码省略
+    // 创建 workInProgressRoot 树
+    prepareFreshStack(root, lanes)
+  }
+
+  if (enableSchedulingProfiler) {
+    markRenderStarted(lanes)
+  }
+
+  /**
+   * 循环条件为 true
+   * 只有正常执行完 workLoopSync 才会 break
+   * 如果 workLoopSync 抛出异常，会被 handleError 捕获，然后继续循环，直到正常执行完毕
+   */
+  do {
+    try {
+      workLoopSync()
+      break
+    } catch (thrownValue) {
+      handleError(root, thrownValue)
+    }
+  } while (true)
+
+  resetContextDependencies()
+
+  // 将执行上下文修改为之前的上下文
+  executionContext = prevExecutionContext
+  popDispatcher(prevDispatcher)
+
+  // 设置 workInProgressRoot 为 null，表示没有正在进行的渲染
+  workInProgressRoot = null
+  workInProgressRootRenderLanes = NoLanes
+
+  return workInProgressRootExitStatus
+}
+```
+```js:renderRootConcurrent
+function renderRootConcurrent(root: FiberRoot, lanes: Lanes) {
+  const prevExecutionContext = executionContext
+  executionContext |= RenderContext
+  const prevDispatcher = pushDispatcher()
+
+  // 判断是否需要创建新的 workInProgressRoot 树
+  if (workInProgressRoot !== root || workInProgressRootRenderLanes !== lanes) {
+
+    resetRenderTimer()
+    prepareFreshStack(root, lanes)
+  }
+
+  if (enableSchedulingProfiler) {
+    markRenderStarted(lanes)
+  }
+
+  /**
+   * 循环条件为 true
+   * 只有正常执行完 workLoopConcurrent 才会 break
+   * 如果 workLoopConcurrent 抛出异常，会被 handleError 捕获，然后继续循环，直到正常执行完毕
+   */
+  do {
+    try {
+      workLoopConcurrent()
+      break
+    } catch (thrownValue) {
+      handleError(root, thrownValue)
+    }
+  } while (true)
+
+  resetContextDependencies()
+
+  popDispatcher(prevDispatcher)
+  executionContext = prevExecutionContext
+
+  // Check if the tree has completed.
+  if (workInProgress !== null) {
+    // Still work remaining.
+    if (enableSchedulingProfiler) {
+      markRenderYielded()
+    }
+    return RootInProgress
+  } else {
+    // Completed the tree.
+    if (enableSchedulingProfiler) {
+      markRenderStopped()
+    }
+
+    // Set this to null to indicate there's no in-progress render.
+    workInProgressRoot = null
+    workInProgressRootRenderLanes = NoLanes
+
+    // Return the final exit status.
+    return workInProgressRootExitStatus
+  }
+}
+```
+
+`workLoop`，构造 Fiber 树的循环
+
+```js:workLoop
+function workLoopSync() {
+  // Already timed out, so perform work without checking if we need to yield.
+  while (workInProgress !== null) {
+    performUnitOfWork(workInProgress);
+  }
+}
+function workLoopConcurrent() {
+  // Perform work until Scheduler asks us to yield
+  while (workInProgress !== null && !shouldYield()) {
+    performUnitOfWork(workInProgress);
+  }
+}
+```
+`shouldYield`：`Scheduler.shouldYieldToHost`，该函数会判断当前是否有剩余时间，如果没有剩余时间，就会返回 `true` 表示需要中断当前任务。
+
+```js:performUnitOfWork
+function performUnitOfWork(unitOfWork: Fiber): void {
+  // unitOfWork 即传入的 workInProgress
+  const current = unitOfWork.alternate // 双缓冲架构
+
+  let next
+  // ... 部分代码省略
+  // 调用 beginWork 函数，进入 “递” 阶段
+  next = beginWork(current, unitOfWork, subtreeRenderLanes)
+
+  // 收集 props
+  unitOfWork.memoizedProps = unitOfWork.pendingProps
+
+  // 当 next 为 null 时，表示当前 workInProgress 没有子节点
+  if (next === null) {
+    // 调用 completeUnitOfWork 函数，进入 “归” 阶段
+    completeUnitOfWork(unitOfWork)
+  } else {
+    // 更新 workInProgress 指针为 next （即子 Fiber 节点）
+    workInProgress = next
+  }
+
+  ReactCurrentOwner.current = null
+}
+```
+
+- `beginWork` 递阶段，从 rootFiber 开始深度优先遍历，根据传入的 Fiber 节点创建子节点，并且把这两个节点连接起来。
+- `completeUnitOfWork -> completeWork` 归阶段，completeWork 执行完如果存在兄弟节点，进入兄弟节点的递阶段，否则进入父节点的归阶段。
+
+### commit 阶段
+
+![commitRoot](/static/images/react/commitRoot.png)
+
+## 调度过程
+
+到目前，一个大体的从输入到输出的流程，算是搞清楚了，最后来看看巧妙的调度机制。
+
+![scheduler](/static/images/react/scheduler.png)
+
+### 创建任务
+
+进入调度的入口是 `unstable_scheduleCallback` 这个方法：
+
+```js:unstable_scheduleCallback
+// 省略部分无关代码
+function unstable_scheduleCallback(priorityLevel, callback, options) {
+  var currentTime = getCurrentTime();
+
+  var startTime;
+  if (typeof options === 'object' && options !== null) {
+    // 通过 options 设置延迟
+  } else {
+    startTime = currentTime;
+  }
+
+  // 根据优先级，设置过期时间
+  var timeout;
+  switch (priorityLevel) {
+    case ImmediatePriority:
+      timeout = IMMEDIATE_PRIORITY_TIMEOUT;
+      break;
+    case UserBlockingPriority:
+      timeout = USER_BLOCKING_PRIORITY_TIMEOUT;
+      break;
+    case IdlePriority:
+      timeout = IDLE_PRIORITY_TIMEOUT;
+      break;
+    case LowPriority:
+      timeout = LOW_PRIORITY_TIMEOUT;
+      break;
+    case NormalPriority:
+    default:
+      timeout = NORMAL_PRIORITY_TIMEOUT;
+      break;
+  }
+
+  var expirationTime = startTime + timeout;
+  
+  // 创建新任务
+  var newTask = {
+    id: taskIdCounter++,
+    callback,
+    priorityLevel,
+    startTime,
+    expirationTime,
+    sortIndex: -1,
+  };
+
+  if (startTime > currentTime) {
+    // 省略，延迟 task，放入 timerQueue
+  } else {
+    newTask.sortIndex = expirationTime;
+    push(taskQueue, newTask);
+    if (enableProfiling) {
+      markTaskStart(newTask, currentTime);
+      newTask.isQueued = true;
+    }
+    // Schedule a host callback, if needed. If we're already performing work,
+    // wait until the next time we yield.
+    if (!isHostCallbackScheduled && !isPerformingWork) {
+      isHostCallbackScheduled = true;
+      requestHostCallback(flushWork);
+    }
+  }
+
+  return newTask;
+}
+```
+```js:requestHostCallback
+function requestHostCallback(callback) {
+  scheduledHostCallback = callback;
+  if (!isMessageLoopRunning) {
+    isMessageLoopRunning = true;
+    // 根据环境和兼容性分别使用 setImmediate/MessageChannel/setTimeout 发送消息
+    schedulePerformWorkUntilDeadline(); 
+  }
+}
+```
+
+### 消费任务
+
+```js:performWorkUntilDeadline
+const performWorkUntilDeadline = () => {
+  // scheduledHostCallback 是在 requestHostCallback 缓存的 flushWork 消费任务函数
+  if (scheduledHostCallback !== null) {
+    const currentTime = getCurrentTime();
+    // Keep track of the start time so we can measure how long the main thread
+    // has been blocked.
+    startTime = currentTime;
+    const hasTimeRemaining = true;
+
+    let hasMoreWork = true;
+    try {
+      hasMoreWork = scheduledHostCallback(hasTimeRemaining, currentTime); // flushWork 被打断时会返回 true
+    } finally {
+      if (hasMoreWork) {
+        // If there's more work, schedule the next message event at the end
+        // of the preceding one.
+        schedulePerformWorkUntilDeadline();
+      } else {
+        isMessageLoopRunning = false;
+        scheduledHostCallback = null;
+      }
+    }
+  } else {
+    isMessageLoopRunning = false;
+  }
+  // Yielding to the browser will give it a chance to paint, so we can
+  // reset this.
+  needsPaint = false;
+};
+```
+```js:flushWork
+// 省略部分代码
+function flushWork(hasTimeRemaining, initialTime) {
+  // 做好全局标记, 表示现在已经进入调度阶段
+  isHostCallbackScheduled = false;
+  isPerformingWork = true;
+  const previousPriorityLevel = currentPriorityLevel;
+  try {
+    return workLoop(hasTimeRemaining, initialTime);
+  } finally {
+    currentTask = null;
+    currentPriorityLevel = previousPriorityLevel;
+    isPerformingWork = false;
+  }
+}
+```
+
+任务队列消费的关键函数就是这个 `workLoop`：
+
+```js:workLoop
+function workLoop(hasTimeRemaining, initialTime) {
+  let currentTime = initialTime; // 保存当前时间，用于判断是否过期
+  advanceTimers(currentTime); // 检查 timerQueue，把不再延迟的任务加入到 taskQueue 中
+  currentTask = peek(taskQueue); // 从小顶堆中获取堆顶任务（最优先的）
+
+  while (currentTask !== null) {
+    if (
+      currentTask.expirationTime > currentTime &&
+      (!hasTimeRemaining || shouldYieldToHost())
+    ) {
+      // currentTask没有过期, 但是执行时间超过了限制(毕竟只有5ms, shouldYieldToHost()返回true). 停止继续执行, 让出主线程
+      // This currentTask hasn't expired, and we've reached the deadline.
+      break;
+    }
+    const callback = currentTask.callback; // 任务的回调，对应 performConcurrentWorkOnRoot
+    if (typeof callback === 'function') {
+      currentTask.callback = null;
+      currentPriorityLevel = currentTask.priorityLevel;
+      const didUserCallbackTimeout = currentTask.expirationTime <= currentTime;
+      // 执行回调
+      const continuationCallback = callback(didUserCallbackTimeout);
+      currentTime = getCurrentTime();
+      // 判断是否还有派生回调
+      if (typeof continuationCallback === 'function') {
+        // 产生了连续回调(如fiber树太大, 出现了中断渲染), currentTask和派生回调仍然保留着
+        currentTask.callback = continuationCallback;
+      } else {
+        if (currentTask === peek(taskQueue)) {
+          pop(taskQueue);
+        }
+      }
+      advanceTimers(currentTime); // 再次检查 timerQueue 是否有任务到达执行时间
+    } else {
+      // 如果任务被取消(这时currentTask.callback = null), 将其移出队列
+      pop(taskQueue);
+    }
+    currentTask = peek(taskQueue); // 继续取出下一个任务
+  }
+  // Return whether there's additional work
+  if (currentTask !== null) {
+    return true; // 任务执行完返回 true， 等待调度中心下一次调度
+  } else {
+    // taskQueue 执行完毕，请求 timerQueue
+    const firstTimer = peek(timerQueue);
+    if (firstTimer !== null) {
+      requestHostTimeout(handleTimeout, firstTimer.startTime - currentTime);
+    }
+    return false;
+  }
+}
+```
+
+代码不多，但 `时间切片` 和 `fiber树的可中断渲染` 的精髓，都集中在这个循环内。
+
+`时间切片`，每一次 `while` 循环的退出就是一个时间切片，退出条件有两种情况：
+- `taskQueue` 全部执行完退出
+- 任务超时，每轮 `while` 循环开始都会检测任务执行时间是否会超时，如果超时就立即退出，等待下一次调度
+
+`fiber树的可中断渲染`，还记得 `workLoopConcurrent` 的 while 循环条件: `workInProgress !== null && !shouldYield()`，每构造一个单元，就会去检测一下是否超时，
+如遇超时就退出 `fiber树构造循环`, 并返回一个新的回调函数(`就是此处的 continuationCallback`)并等待下一次回调继续未完成的fiber树构造
+
+{/* ## Hook */}
+
+---
+
+## 总结
+
+本文也只是记录了大概得 React 运行流程，一些细节就不过多赘述了。
+
+## 推荐博文
+
+- [dan abramov 的博客](https://overreacted.io/)
+- [React 技术揭秘](https://react.iamkasong.com/)
+- [图解 React](https://7km.top/)
+

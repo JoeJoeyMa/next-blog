@@ -1,0 +1,30 @@
+{
+  "greeting": "最新",
+  "description": "一个使用 Next.js、i18n 和 Tailwind.css 创建的博客",
+  "more": "阅读更多",
+  "all": "所有文章",
+
+  "moreaboutme": "更多关于我",
+
+  "featured": "精选",
+  "morefeatured": "更多精选文章",
+  "morerecent": "更多最近文章",
+
+  "search": "搜索",
+  "searchposts": "搜索文章",
+  "comment": "加载评论",
+  "pub": "发表于",
+  "authors": "作者",
+  "name": "姓名",
+  "nexta": "下一篇文章",
+  "preva": "上一篇文章",
+  "nextp": "下一个",
+  "prevp": "上一个",
+  "of": "的",
+  "back": "返回博客",
+  "twitter": "在 Twitter 上讨论",
+  "github": "在 GitHub 上查看",
+  "draft": "草稿",
+  "noposts": "未找到文章",
+  "poststagged": "查看标记的文章"
+}
