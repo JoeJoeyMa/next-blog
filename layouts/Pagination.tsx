@@ -1,35 +1,21 @@
+import Link from '@/components/mdxcomponents/Link'
 import { useTranslation } from 'app/[locale]/i18n/client'
 import { LocaleTypes } from 'app/[locale]/i18n/settings'
 
 interface PaginationProps {
   totalPages: number
   currentPage: number
-  onPageChange: (page: number) => void
   params: { locale: LocaleTypes }
 }
+
 export default function Pagination({
   totalPages,
   currentPage,
-  onPageChange,
   params: { locale },
 }: PaginationProps) {
   const { t } = useTranslation(locale, 'home')
   const prevPage = currentPage - 1 > 0
   const nextPage = currentPage + 1 <= totalPages
-
-  const handlePrevPage = () => {
-    if (prevPage) {
-      sessionStorage.setItem('currentPage', (currentPage - 1).toString());
-      onPageChange(currentPage - 1);
-    }
-  }
-
-  const handleNextPage = () => {
-    if (nextPage) {
-      sessionStorage.setItem('currentPage', (currentPage + 1).toString());
-      onPageChange(currentPage + 1);
-    }
-  }
 
   return (
     <div className="space-y-2 pb-8 pt-6 md:space-y-5">
@@ -39,16 +25,24 @@ export default function Pagination({
             {t('prevp')}
           </button>
         )}
-        {prevPage && <button onClick={handlePrevPage}> {t('prevp')}</button>}
+        {prevPage && (
+          <Link href={`/${locale}/blog/${currentPage - 1}`}>
+            {t('prevp')}
+          </Link>
+        )}
         <span>
-          {currentPage} of {totalPages}
+          {currentPage} {t('of')} {totalPages}
         </span>
         {!nextPage && (
           <button className="cursor-auto disabled:opacity-50" disabled={!nextPage}>
             {t('nextp')}
           </button>
         )}
-        {nextPage && <button onClick={handleNextPage}>{t('nextp')}</button>}
+        {nextPage && (
+          <Link href={`/${locale}/blog/${currentPage + 1}`}>
+            {t('nextp')}
+          </Link>
+        )}
       </nav>
     </div>
   )

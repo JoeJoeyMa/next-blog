@@ -1,9 +1,8 @@
 'use client'
 
-import { useCallback } from 'react'
-import { useParams } from 'next/navigation'
+import { slug } from 'github-slugger'
 import Link from 'next/link'
-import { useTagStore } from '../util/useTagStore'
+import { useParams } from 'next/navigation'
 import { LocaleTypes } from 'app/[locale]/i18n/settings'
 
 interface Props {
@@ -12,18 +11,11 @@ interface Props {
 
 const Tag = ({ text }: Props) => {
   const locale = useParams()?.locale as LocaleTypes
-  const { setSelectedTag } = useTagStore()
-
-  const handleClick = useCallback(() => {
-    setSelectedTag(text)
-  }, [text, setSelectedTag])
+  const sluggedTag = slug(text)
 
   return (
-    <Link href={`/${locale}/blog`}>
-      <span
-        onClick={handleClick}
-        className="mr-3 cursor-pointer text-sm font-medium uppercase text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
-      >
+    <Link href={`/${locale}/tags/${sluggedTag}`}>
+      <span className="mr-3 text-sm font-medium uppercase text-primary-500 hover:text-primary-600 dark:hover:text-primary-400">
         {text.split(' ').join('-')}
       </span>
     </Link>

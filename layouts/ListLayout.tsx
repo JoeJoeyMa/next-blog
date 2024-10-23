@@ -1,31 +1,31 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
+import { slug } from 'github-slugger'
 import { useState } from 'react'
-import { useTagStore } from '@/components/util/useTagStore'
-import { motion } from 'framer-motion'
+import { usePathname } from 'next/navigation'
 import { formatDate } from 'pliny/utils/formatDate'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog } from 'contentlayer/generated'
 import Link from '@/components/mdxcomponents/Link'
-import { sortByDate } from '@/components/util/sortByDate'
+import Tag from '@/components/Tag'
+import { useTagStore } from '@/components/util/useTagStore'
+import { motion } from 'framer-motion'
 import Pagination from './Pagination'
 import tagData from 'app/[locale]/tag-data.json'
-import { POSTS_PER_PAGE } from '@/data/postsPerPage'
 import { useTranslation } from 'app/[locale]/i18n/client'
 import { LocaleTypes } from 'app/[locale]/i18n/settings'
-
-interface PaginationProps {
-  totalPages: number
-  currentPage: number
-  params: { locale: LocaleTypes }
-}
 
 interface ListLayoutProps {
   params: { locale: LocaleTypes }
   posts: CoreContent<Blog>[]
   title: string
   initialDisplayPosts?: CoreContent<Blog>[]
-  pagination?: PaginationProps
+  pagination?: {
+    currentPage
+    totalPages: number
+    params: { locale: LocaleTypes }
+  }
 }
 
 const container = {
@@ -43,59 +43,35 @@ const item = {
   show: { opacity: 1, x: 0, y: 0 },
 }
 
-export default function ListLayoutWithTags({ params: { locale }, posts, title }: ListLayoutProps) {
+export default function ListLayoutWithTags({
+  params: { locale },
+  posts,
+  title,
+  initialDisplayPosts = [],
+  pagination,
+}: ListLayoutProps) {
   const { t } = useTranslation(locale, 'home')
-  const savedPage = sessionStorage.getItem('currentPage');
-  const [currentPage, setCurrentPage] = useState(savedPage ? parseInt(savedPage) : 1);
-  const postsPerPage = POSTS_PER_PAGE
-  const sortedPosts = sortByDate(posts)
-  const setSelectedTag = useTagStore((state) => state.setSelectedTag)
-
-  const filteredPosts = useTagStore((state) => {
-    if (state.selectedTag) {
-      return sortedPosts.filter((post) => post.tags.includes(state.selectedTag))
-    } else {
-      return sortedPosts
-    }
-  })
-
-  const totalPages = Math.ceil(filteredPosts.length / postsPerPage)
-  const startIndex = (currentPage - 1) * postsPerPage
-  const endIndex = startIndex + postsPerPage
-  const displayPosts = filteredPosts.slice(startIndex, endIndex)
-
-  const onPageChange = (page: number) => {
-    setCurrentPage(page)
-  }
-
-  const handleTagClick = (tag: string) => {
-    setSelectedTag(tag === useTagStore.getState().selectedTag ? '' : tag)
-    setCurrentPage(1)
-  }
-
+  const router = useRouter()
+  const pathname = usePathname()
   const tagCountMap = tagData[locale]
 
-  const filteredTags = Object.keys(tagCountMap).map((postTag) => {
-    return (
-      <li key={postTag} className="my-3">
-        <button
-          onClick={() => handleTagClick(postTag)}
-          aria-labelledby={`${t('poststagged')} ${postTag}`}
-        >
-          <h3
-            className={`inline px-3 py-2 text-sm font-medium uppercase ${
-              useTagStore.getState().selectedTag === postTag
-                ? 'text-primary-500'
-                : 'text-gray-500 hover:text-primary-500 dark:text-gray-300 dark:hover:text-primary-500'
-            }`}
-          >
-            {' '}
-            {postTag} ({tagCountMap[postTag]})
-          </h3>
-        </button>
-      </li>
-    )
-  })
+  const handleTagClick = (tag: string) => {
+    const sluggedTag = slug(tag)
+    router.push(`/${locale}/tags/${sluggedTag}`)
+  }
+
+  // 更新标签渲染逻辑
+  const filteredTags = Object.keys(tagCountMap).map((tag) => (
+    <li key={tag} className="my-3">
+      <button
+        onClick={() => handleTagClick(tag)}
+        className="text-gray-500 hover:text-primary-500 dark:text-gray-300 dark:hover:text-primary-500 px-3 py-2 text-sm font-medium uppercase"
+        aria-label={`View posts tagged ${tag}`}
+      >
+        {tag} ({tagCountMap[tag]})
+      </button>
+    </li>
+  ))
 
   return (
     <>
@@ -108,22 +84,22 @@ export default function ListLayoutWithTags({ params: { locale }, posts, title }:
         <div className="flex sm:space-x-24">
           <div className="hidden h-full max-h-screen min-w-[280px] max-w-[280px] flex-wrap overflow-auto rounded bg-gray-50 pt-5 shadow-md dark:bg-gray-900/70 dark:shadow-gray-800/40 sm:flex">
             <div className="px-6 py-4">
-              <button
-                onClick={() => setSelectedTag('')}
-                className={`${useTagStore.getState().selectedTag === '' ? 'text-heading-500 dark:text-heading-400' : 'text-gray-500 dark:text-gray-400'} font-bold uppercase`}
+              <Link
+                href={`/${locale}/blog`}
+                className="text-gray-500 dark:text-gray-400 font-bold uppercase hover:text-primary-500"
               >
                 {t('all')}
-              </button>
+              </Link>
               <ul>{filteredTags}</ul>
             </div>
           </div>
           <div>
             <motion.ul variants={container} initial="hidden" animate="show">
-              {displayPosts.map((post) => {
+              {(initialDisplayPosts.length > 0 ? initialDisplayPosts : posts).map((post) => {
                 const { slug, date, title, summary, tags, language } = post
                 if (language === locale) {
                   return (
-                    <motion.li variants={item} key={slug} className="py-5">
+                    <motion.li key={slug} variants={item} className="py-5">
                       <article className="flex flex-col space-y-2 xl:space-y-0">
                         <dl>
                           <dt className="sr-only">{t('pub')}</dt>
@@ -147,14 +123,10 @@ export default function ListLayoutWithTags({ params: { locale }, posts, title }:
                                 <li key={t} className="my-3">
                                   <button
                                     onClick={() => handleTagClick(t)}
-                                    className={`${
-                                      useTagStore.getState().selectedTag === t
-                                        ? 'text-heading-500 dark:text-heading-400'
-                                        : 'text-primary-500 hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-500'
-                                    } mr-3 text-sm font-medium uppercase`}
+                                    className="text-primary-500 hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-500 mr-3 text-sm font-medium uppercase"
                                     aria-label={`View posts tagged ${t}`}
                                   >
-                                    {`${t}`}
+                                    {t}
                                   </button>
                                 </li>
                               ))}
@@ -170,12 +142,11 @@ export default function ListLayoutWithTags({ params: { locale }, posts, title }:
                 }
               })}
             </motion.ul>
-            {totalPages > 1 && (
+            {pagination && pagination.totalPages > 1 && (
               <Pagination
-                totalPages={totalPages}
-                currentPage={currentPage}
-                onPageChange={onPageChange}
-                params={{ locale: locale }}
+                totalPages={pagination.totalPages}
+                currentPage={pagination.currentPage}
+                params={{ locale }}
               />
             )}
           </div>

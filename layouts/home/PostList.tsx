@@ -1,6 +1,6 @@
 import React from 'react'
 import Link from '@/components/mdxcomponents/Link'
-import Tag from '@/components/tag'
+import Tag from '@/components/Tag'
 import { formatDate } from 'pliny/utils/formatDate'
 import { LocaleTypes } from 'app/[locale]/i18n/settings'
 
