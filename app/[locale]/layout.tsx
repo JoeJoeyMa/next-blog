@@ -14,6 +14,7 @@ import { Metadata } from 'next'
 import { dir } from 'i18next'
 import { LocaleTypes, locales } from './i18n/settings'
 import TwSizeIndicator from '@/components/helper/TwSizeIndicator'
+import Script from 'next/script'
 
 export async function generateStaticParams() {
   return locales.map((locale) => ({ locale }))
@@ -108,6 +109,7 @@ export default function RootLayout({
           </SectionContainer>
         </ThemeProvider>
       </body>
+      <Script defer src="https://cloud.umami.is/script.js" data-website-id="5b227cb5-f004-4441-bbb1-e526b7dcedd1"></Script>
     </html>
   )
 }
