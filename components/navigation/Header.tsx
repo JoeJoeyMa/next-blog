@@ -13,6 +13,7 @@ import SearchButton from '../search/SearchButton'
 import { useTranslation } from 'app/[locale]/i18n/client'
 import type { LocaleTypes } from 'app/[locale]/i18n/settings'
 import { motion } from 'framer-motion'
+import Script from 'next/script'
 
 const Header = () => {
   const locale = useParams()?.locale as LocaleTypes
@@ -21,6 +22,7 @@ const Header = () => {
 
   return (
     <header>
+    <Script defer src="https://cloud.umami.is/script.js" data-website-id="5b227cb5-f004-4441-bbb1-e526b7dcedd1"></Script>
       <div className="flex items-center justify-between py-10">
         <div>
           <Link href={`/${locale}/`} aria-label={siteMetadata.headerTitle}>
