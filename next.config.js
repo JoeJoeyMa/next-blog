@@ -77,6 +77,15 @@ module.exports = () => {
         },
       ]
     },
+    async rewrites() {
+      return [
+        {
+          source: '/umami/script.js',
+          destination: 'https://cloud.umami.is/script.js',
+        },
+      ]
+    },
+
     webpack: (config, options) => {
       config.module.rules.push({
         test: /\.svg$/,

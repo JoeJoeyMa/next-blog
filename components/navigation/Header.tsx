@@ -22,7 +22,7 @@ const Header = () => {
 
   return (
     <header>
-    <Script defer src="https://cloud.umami.is/script.js" data-website-id="5b227cb5-f004-4441-bbb1-e526b7dcedd1"></Script>
+    <Script defer src="/umami/script.js" data-website-id="5b227cb5-f004-4441-bbb1-e526b7dcedd1"></Script>
       <div className="flex items-center justify-between py-10">
         <div>
           <Link href={`/${locale}/`} aria-label={siteMetadata.headerTitle}>
