@@ -5,6 +5,8 @@ import HomeLayout from '@/layouts/HomeLayout'
 import { LocaleTypes } from './i18n/settings'
 import AuthorCard from '@/components/AuthorCard'
 import Wave from '@/components/wave'
+import Intro from '@/components/portfolio/intro'
+import Projects from '@/components/portfolio/projects'
 
 type HomeProps = {
   params: { locale: LocaleTypes }
@@ -21,7 +23,9 @@ export default async function Page({ params: { locale } }: HomeProps) {
   return (
     <>
       <AuthorCard content={mainContent} />
+      <Intro />
       <Wave />
+      <Projects />
       {hasFeaturedPosts && <FeaturedLayout posts={hasFeaturedPosts} params={{ locale }} />}
       <HomeLayout posts={filteredPosts} params={{ locale }} />
 

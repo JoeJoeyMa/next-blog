@@ -3,6 +3,9 @@ type Project = {
   description: string
   imgSrc: string
   href: string
+  videoUrl?: string
+  tags?: string[]
+  feats?: string[]
 }
 
 type ProjectsData = {
@@ -16,6 +19,8 @@ const projectsData: ProjectsData = {
       description: `Full stack ecomerce demo for nextjs+TypeScript+Tailwind CSS+Redis+PostgreSQL+MeiliSearch+Checkout with PayPal and Stripe`,
       imgSrc: '/static/images/QQ_1731220326601.png',
       href: 'https://github.com/JoeJoeyMa/ecomerce_demo',
+      tags: ['NextJS', 'TypeScript', 'Tailwind CSS', 'Redis', 'PostgreSQL'],
+      feats: ['PayPal Integration', 'Stripe Checkout', 'MeiliSearch'],
     },
     {
       title: 'ERP/OS/Business-Finance Integration/Inventory and Logistics Management SaaS',
