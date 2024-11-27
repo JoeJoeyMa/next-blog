@@ -35,8 +35,8 @@ const projectsData: ProjectsData = {
       href: 'https://github.com/JoeJoeyMa/AI-RAG-demo',
     },
     {
-      title: 'p2p-video-call-app',
-      description: `A free, peer-to-peer group video call application for the web. No signups required. No downloads needed. Works in all major browsers.`,
+      title: 'WebRTC IM based on Nodejs + socket.io + express',
+      description: `WebRTC IM based on Nodejs + socket.io + express.suport p2p group mode video call and message,stands for Web Real-Time Communications  exchange connection data in the form of SDP objects but never touches the data itself, that is actually transmitted between the peers themselves via STUN and TURN servers`,
       imgSrc: '/static/images/QQ_1731225072141.png',
       href: 'https://github.com/JoeJoeyMa/p2p-video-call',
     },
@@ -68,8 +68,8 @@ const projectsData: ProjectsData = {
       href: 'https://github.com/JoeJoeyMa/AI-RAG-demo',
     },
     {
-      title: 'p2p-video-call-app',
-      description: `A free, peer-to-peer group video call application for the web. No signups required. No downloads needed. Works in all major browsers.`,
+      title: 'WebRTC IM based on Nodejs + socket.io + express',
+      description: `WebRTC IM based on Nodejs + socket.io + express.suport p2p group mode video call and message,stands for Web Real-Time Communications  exchange connection data in the form of SDP objects but never touches the data itself, that is actually transmitted between the peers themselves via STUN and TURN servers`,
       imgSrc: '/static/images/QQ_1731225072141.png',
       href: 'https://github.com/JoeJoeyMa/p2p-video-call',
     },
