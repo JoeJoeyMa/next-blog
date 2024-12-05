@@ -71,7 +71,7 @@ export default function Intro() {
         </p>
         <p className=" text-lg">Frontend Dev | FullStack | ReactJs + NodeJs</p>
         <p className="text-base">
-          Speaker of <span className="font-bold">English  Chinese</span>
+          Speaker of <span className="font-bold">English  Cantonese  Mandarin</span>
         </p>
         <a className=" block text-sm font-bold underline" href="/#skills">
           more skills check here{" "}
