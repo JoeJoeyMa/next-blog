@@ -94,5 +94,8 @@
   "volta": {
     "node": "20.11.1"
   },
+  "resolutions": {
+    "ajv": "8.17.1"
+  },
   "packageManager": "yarn@4.0.2"
 }

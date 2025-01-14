@@ -4,5 +4,11 @@
   "read": "阅读更多",
   "visit": "访问项目",
   "subtitle": "在这里您可以找到我当前项目的信息。",
-  "linkto": "链接到"
+  "linkto": "链接到",
+  "categories": {
+    "website": "网站",
+    "tools": "工具",
+    "personal": "个人",
+    "others": "其他"
+  }
 }
