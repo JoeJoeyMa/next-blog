@@ -88,5 +88,11 @@
       "prettier --write"
     ]
   },
+  "engines": {
+    "node": "^20.0.0"
+  },
+  "volta": {
+    "node": "20.11.1"
+  },
   "packageManager": "yarn@4.0.2"
 }
