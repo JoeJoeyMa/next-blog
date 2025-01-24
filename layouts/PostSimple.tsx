@@ -72,7 +72,7 @@ export default async function PostLayout({
                   <Comments slug={slug} />
                 )}
               </div>
-              <footer>
+              <footer className="sticky top-8">
                 <div className="flex flex-col text-sm font-medium sm:flex-row sm:justify-between sm:text-base">
                   {prev && prev.slug && (
                     <div className="pt-4 xl:pt-8">

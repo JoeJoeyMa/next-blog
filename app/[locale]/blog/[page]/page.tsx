@@ -4,7 +4,7 @@ import { allBlogs } from 'contentlayer/generated'
 import { LocaleTypes } from '../../i18n/settings';
 
 
-const POSTS_PER_PAGE = 5
+const POSTS_PER_PAGE = 10
 
 export async function generateStaticParams() {
   const posts = allCoreContent(sortPosts(allBlogs))

@@ -4,6 +4,9 @@ import tagData from 'app/[locale]/tag-data.json'
 import { genPageMetadata } from 'app/[locale]/seo'
 import { createTranslation } from '../i18n/server'
 import { LocaleTypes } from '../i18n/settings'
+import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
+import { allBlogs } from 'contentlayer/generated'
+import ListLayout from '@/layouts/ListLayout'
 
 type TagsProps = {
   params: { locale: LocaleTypes }
@@ -18,10 +21,15 @@ export async function generateMetadata({ params: { locale } }: TagsProps): Promi
   })
 }
 
-export default function Page({ params: { locale } }: TagsProps) {
+export default async function Page({ params: { locale } }: TagsProps) {
+  const { t } = await createTranslation(locale, 'home')
   const tagCounts = tagData[locale]
   const tagKeys = Object.keys(tagCounts)
   const sortedTags = tagKeys.sort((a, b) => tagCounts[b] - tagCounts[a])
+
+  // Get all posts for the current locale
+  const posts = allCoreContent(sortPosts(allBlogs))
+  const filteredPosts = posts.filter((post) => post.language === locale)
 
   return (
     <>
@@ -42,6 +50,19 @@ export default function Page({ params: { locale } }: TagsProps) {
             </div>
           ))}
         </div>
+      </div>
+      <div className="divide-y divide-gray-200 dark:divide-gray-700">
+        <div className="space-y-2 pt-6 pb-8 md:space-y-5">
+          <h2 className="text-2xl font-extrabold leading-9 tracking-tight text-heading-400 dark:text-heading-400 sm:text-3xl sm:leading-10">
+            {t('all')}
+          </h2>
+        </div>
+        <ListLayout
+          posts={filteredPosts}
+          initialDisplayPosts={filteredPosts}
+          params={{ locale }}
+          title=""
+        />
       </div>
     </>
   )

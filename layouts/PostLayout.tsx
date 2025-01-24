@@ -73,7 +73,7 @@ export default async function PostLayout({
             </div>
           </header>
           <div className="grid-rows-[auto_1fr] divide-y divide-gray-200 pb-8 dark:divide-gray-700 xl:grid xl:grid-cols-4 xl:gap-x-6 xl:divide-y-0">
-            <dl className="pb-10 pt-6 xl:border-b xl:border-gray-200 xl:pt-11 xl:dark:border-gray-700">
+            <dl className="xl:sticky xl:top-4 pb-8 pt-4 xl:border-b xl:border-gray-200 xl:pt-8 xl:dark:border-gray-700">
               <dt className="sr-only">{t('authors')}</dt>
               <dd>
                 <ul className="flex flex-wrap justify-center gap-4 sm:space-x-12 xl:block xl:space-x-0 xl:space-y-8">
@@ -136,8 +136,8 @@ export default async function PostLayout({
                 )}
               </div>
             </div>
-            <footer>
-              <div className="divide-gray-200 text-sm font-medium leading-5 dark:divide-gray-700 xl:col-start-1 xl:row-start-2 xl:divide-y">
+            <footer className="xl:sticky xl:top-[calc(4rem+4rem)] xl:col-start-1 xl:row-start-2 h-fit max-h-[calc(100vh-10rem)] overflow-y-auto">
+              <div className="divide-gray-200 text-sm font-medium leading-5 dark:divide-gray-700 xl:divide-y">
                 {tags && (
                   <div className="py-4 xl:py-8">
                     <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
