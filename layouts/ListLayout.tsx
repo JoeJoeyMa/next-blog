@@ -33,14 +33,25 @@ const container = {
   show: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.2,
+      staggerChildren: 0.1,
+      delayChildren: 0.1,
     },
   },
 }
 
 const item = {
   hidden: { opacity: 0, x: -25, y: 0 },
-  show: { opacity: 1, x: 0, y: 0 },
+  show: { 
+    opacity: 1, 
+    x: 0, 
+    y: 0,
+    transition: {
+      type: "spring",
+      stiffness: 260,
+      damping: 20,
+      duration: 0.3
+    }
+  },
 }
 
 export default function ListLayoutWithTags({
