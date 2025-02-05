@@ -24,11 +24,11 @@ export default async function Page({ params: { locale } }: HomeProps) {
     <>
       <AuthorCard content={mainContent} />
       <Intro />
-      <Wave />
+ 
       <Projects />
       {hasFeaturedPosts && <FeaturedLayout posts={hasFeaturedPosts} params={{ locale }} />}
       <HomeLayout posts={filteredPosts} params={{ locale }} />
-
+      <Wave />
     </>
   )
 }

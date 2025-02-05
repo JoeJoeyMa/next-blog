@@ -5,7 +5,7 @@ import Comments from '@/components/comments/Comments'
 import WalineComments from '@/components/comments/walinecomponents/walineComments'
 import Link from '@/components/mdxcomponents/Link'
 import PageTitle from '@/components/PageTitle'
-import SectionContainer from '@/components/SectionContainer'
+import WideContainer from '@/components/WideContainer'
 import Image from '@/components/mdxcomponents/Image'
 import Tag from '@/components/Tag'
 import siteMetadata from '@/data/siteMetadata'
@@ -53,10 +53,10 @@ export default async function PostLayout({
   const { t } = await createTranslation(locale, 'home')
   const tableOfContents: Toc = toc as unknown as Toc
   return (
-    <>
+    <WideContainer>
       <ScrollTopAndComment />
       <Sidetoc toc={tableOfContents} />
-      <RightToc toc={tableOfContents} />
+      {/* <RightToc toc={tableOfContents} /> */}
       <article>
         <div className="xl:divide-y xl:divide-gray-200 xl:dark:divide-gray-700">
           <header className="pt-6 xl:pb-6">
@@ -189,6 +189,6 @@ export default async function PostLayout({
           </div>
         </div>
       </article>
-    </>
+    </WideContainer>
   )
 }
