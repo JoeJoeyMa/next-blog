@@ -16,6 +16,7 @@ import { PostSeriesBox } from '@/components/seriescard'
 import Share from '@/components/share'
 import { Toc } from 'pliny/mdx-plugins'
 import Sidetoc from '@/components/sidetoc'
+import ScrollProgress from '@/components/scroll/ScrollProgress'
 
 const editUrl = (path) => `${siteMetadata.siteRepo}/blob/main/data/${path}`
 const discussUrl = (path) =>
@@ -175,7 +176,7 @@ export default async function PostLayout({
                   </div>
                 )}
               </div>
-              <div className="pt-4 xl:pt-8">
+              <div className="pt-4 xl:pt-8 mb-8">
                 <Link
                   href={`/${locale}/${basePath}`}
                   className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
@@ -183,6 +184,9 @@ export default async function PostLayout({
                 >
                   &larr;{t('back')}
                 </Link>
+              </div>
+              <div className="sticky bottom-0">
+                <ScrollProgress />
               </div>
             </footer>
           </div>
