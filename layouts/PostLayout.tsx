@@ -16,6 +16,7 @@ import { PostSeriesBox } from '@/components/seriescard'
 import Share from '@/components/share'
 import { Toc } from 'pliny/mdx-plugins'
 import Sidetoc from '@/components/sidetoc'
+import RightToc from '@/components/righttoc'
 import ScrollProgress from '@/components/scroll/ScrollProgress'
 import BackNavigation from '@/components/navigation/BackNavigation'
 
@@ -55,6 +56,7 @@ export default async function PostLayout({
     <>
       <ScrollTopAndComment />
       <Sidetoc toc={tableOfContents} />
+      <RightToc toc={tableOfContents} />
       <article>
         <div className="xl:divide-y xl:divide-gray-200 xl:dark:divide-gray-700">
           <header className="pt-6 xl:pb-6">
