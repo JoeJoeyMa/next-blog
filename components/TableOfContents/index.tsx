@@ -35,7 +35,9 @@ const TableOfContents = (props: TableOfContentsProps) => {
     });
 
     toc.forEach(({ url }) => {
-      const element = document.querySelector(url);
+      // 移除URL中的数字后缀
+      const cleanUrl = url.replace(/-\d+$/, '');
+      const element = document.querySelector(cleanUrl);
 
       if (element) {
         observer.observe(element);
@@ -44,7 +46,9 @@ const TableOfContents = (props: TableOfContentsProps) => {
 
     return () => {
       toc.forEach(({ url }) => {
-        const element = document.querySelector(url);
+        // 移除URL中的数字后缀
+        const cleanUrl = url.replace(/-\d+$/, '');
+        const element = document.querySelector(cleanUrl);
 
         if (element) {
           observer.unobserve(element);
@@ -61,17 +65,20 @@ const TableOfContents = (props: TableOfContentsProps) => {
       </summary>
 
       <ul className="flex flex-col space-y-2">
-        {toc.map(({ value, depth, url }) => (
-          <li
-            key={url}
-            className={clsx('text-gray-500 dark:text-gray-400', {
-              'text-gray-200 dark:text-primary-600': activeId === url,
-            })}
-            style={{ paddingLeft: (depth - 2) * 16 }}
-          >
-            <Link href={url}>{value}</Link>
-          </li>
-        ))}
+        {toc.map(({ value, depth, url }) => {
+          const cleanUrl = url.replace(/-\d+$/, '');
+          return (
+            <li
+              key={url}
+              className={clsx('text-gray-500 dark:text-gray-400', {
+                'text-gray-200 dark:text-primary-600': activeId === cleanUrl,
+              })}
+              style={{ paddingLeft: (depth - 2) * 16 }}
+            >
+              <Link href={cleanUrl}>{value}</Link>
+            </li>
+          );
+        })}
       </ul>
     </details>
   );
