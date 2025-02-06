@@ -19,6 +19,7 @@ import Sidetoc from '@/components/sidetoc'
 import RightToc from '@/components/righttoc'
 import ScrollProgress from '@/components/scroll/ScrollProgress'
 import BackNavigation from '@/components/navigation/BackNavigation'
+import TableOfContents from '@/components/TableOfContents'
 
 const editUrl = (path) => `${siteMetadata.siteRepo}/blob/main/data/${path}`
 const discussUrl = (path) =>
@@ -179,6 +180,11 @@ export default async function PostLayout({
                   </div>
                 )}
               </div>
+              <div className="hidden lg:col-span-4 lg:block xl:col-span-3">
+            <div className="space-y-4 divide-y divide-gray-200 dark:divide-gray-700 lg:sticky lg:top-16">
+              <TableOfContents toc={tableOfContents} />
+            </div>
+          </div>
               <div className="pt-4 xl:pt-8 mb-8">
                 <BackNavigation locale={locale} basePath={basePath} backLabel={t('back')} />
               </div>
