@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { slug } from 'github-slugger'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { formatDate } from 'pliny/utils/formatDate'
 import { CoreContent } from 'pliny/utils/contentlayer'
@@ -66,6 +66,13 @@ export default function ListLayoutWithTags({
   const pathname = usePathname()
   const tagCountMap = tagData[locale]
 
+  useEffect(() => {
+    // 保存当前页码到sessionStorage
+    if (pagination?.currentPage) {
+      sessionStorage.setItem('lastPageNumber', String(pagination.currentPage))
+    }
+  }, [pagination?.currentPage])
+
   const handleTagClick = (tag: string) => {
     const sluggedTag = slug(tag)
     router.push(`/${locale}/tags/${sluggedTag}`)
@@ -125,6 +132,13 @@ export default function ListLayoutWithTags({
                                 href={`/${locale}/blog/${slug}`}
                                 className="text-gray-900 dark:text-gray-100"
                                 aria-labelledby={title}
+                                onClick={() => {
+                                  if (pagination?.currentPage) {
+                                    sessionStorage.setItem('lastPageNumber', String(pagination.currentPage))
+                                  } else {
+                                    sessionStorage.removeItem('lastPageNumber')
+                                  }
+                                }}
                               >
                                 <h2>{title}</h2>
                               </Link>
