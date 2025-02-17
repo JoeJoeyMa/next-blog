@@ -78,7 +78,7 @@ export default async function PostLayout({
             </div>
           </header>
           <div className="grid-rows-[auto_1fr] divide-y divide-gray-200 pb-8 dark:divide-gray-700 xl:grid xl:grid-cols-4 xl:gap-x-6 xl:divide-y-0">
-            <dl className=" xl:top-4 pb-8 pt-4 xl:border-b xl:border-gray-200 xl:pt-8 xl:dark:border-gray-700">
+            <dl className="xl:top-4 pb-8 pt-4 xl:border-b xl:border-gray-200 xl:pt-8 xl:dark:border-gray-700">
               <dt className="sr-only">{t('authors')}</dt>
               <dd>
                 <ul className="flex flex-wrap justify-center gap-4 sm:space-x-12 xl:block xl:space-x-0 xl:space-y-8">
@@ -188,10 +188,17 @@ export default async function PostLayout({
               <div className="pt-4 xl:pt-8 mb-8">
                 <BackNavigation locale={locale} basePath={basePath} backLabel={t('back')} />
               </div>
-              <div className="sticky bottom-0">
-                <ScrollProgress />
-              </div>
             </footer>
+            {/* 将 TableOfContents 移到这里 */}
+            <div className="hidden xl:block xl:col-start-4 xl:row-span-2">
+              <div className="sticky top-4 space-y-4">
+                <TableOfContents toc={tableOfContents} />
+              </div>
+            </div>
+          </div>
+          {/* ScrollProgress 移到文章容器外部 */}
+          <div className="fixed bottom-0 left-0 right-0 z-10">
+            <ScrollProgress />
           </div>
         </div>
       </article>
