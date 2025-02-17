@@ -56,7 +56,7 @@ export default function BlogPage({ posts, locale }: BlogPageProps) {
           </ul>
         </div>
 
-        {/* <div>
+        <div>
           <PageTitle>Tags</PageTitle>
           <div className="flex flex-wrap gap-4">
             {sortedTags.map((t) => {
@@ -75,7 +75,7 @@ export default function BlogPage({ posts, locale }: BlogPageProps) {
               )
             })}
           </div>
-        </div> */}
+        </div>
 
         <div>
           <PageTitle>Archive</PageTitle>
