@@ -7,6 +7,7 @@ import { LocaleTypes } from '../i18n/settings'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import { allBlogs } from 'contentlayer/generated'
 import ListLayout from '@/layouts/ListLayout'
+import BlogPage from './blog-page'
 
 type TagsProps = {
   params: { locale: LocaleTypes }
@@ -27,7 +28,7 @@ export default async function Page({ params: { locale } }: TagsProps) {
   const tagKeys = Object.keys(tagCounts)
   const sortedTags = tagKeys.sort((a, b) => tagCounts[b] - tagCounts[a])
 
-  // Get all posts for the current locale
+  // 获取所有文章并按语言筛选
   const posts = allCoreContent(sortPosts(allBlogs))
   const filteredPosts = posts.filter((post) => post.language === locale)
 
@@ -51,7 +52,7 @@ export default async function Page({ params: { locale } }: TagsProps) {
           ))}
         </div>
       </div>
-      <div className="divide-y divide-gray-200 dark:divide-gray-700">
+      {/* <div className="divide-y divide-gray-200 dark:divide-gray-700">
         <div className="space-y-2 pt-6 pb-8 md:space-y-5">
           <h2 className="text-2xl font-extrabold leading-9 tracking-tight text-heading-400 dark:text-heading-400 sm:text-3xl sm:leading-10">
             {t('all')}
@@ -63,7 +64,8 @@ export default async function Page({ params: { locale } }: TagsProps) {
           params={{ locale }}
           title=""
         />
-      </div>
+      </div> */}
+      <BlogPage posts={filteredPosts} locale={locale} />
     </>
   )
 }
