@@ -10,5 +10,7 @@
     "tools": "Tools",
     "personal": "Personal",
     "others": "Others"
-  }
+  },
+  "builtWith": "Built with",
+  "features": "Features"
 }

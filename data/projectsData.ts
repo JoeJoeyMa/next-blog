@@ -38,6 +38,7 @@ const projectsData: ProjectsData = {
       description: `Managed the project from inception to deployment, covering both frontend and backend development of a chart platform. This system utilized AI Prompts to generate strategic analysis charts based on input data sets and business analysis requirements, significantly improving the efficiency of data visualization.This is a collection of AI-RAG project materials. Based on the research of the project, AI Prompt-based Business Data Visualization & Analysis was developed.`,
       imgSrc: '/static/images/QQ_1731226164306.png',
       href: 'https://github.com/JoeJoeyMa/AI-RAG-demo',
+      tags: [ 'RAG', 'LLM', 'ChatGPT', 'LangChain'],
       category: 'tools',
     },
     {
@@ -62,6 +63,8 @@ const projectsData: ProjectsData = {
       description: `全栈开发 for nextjs+TypeScript+Tailwind CSS+Redis+PostgreSQL+MeiliSearch+Checkout with PayPal and Stripe`,
       imgSrc: '/static/images/QQ_1731220326601.png',
       href: 'https://github.com/JoeJoeyMa/ecomerce_demo',
+      tags: ['NextJS', 'TypeScript', 'Tailwind CSS', 'Redis', 'PostgreSQL'],
+      feats: ['PayPal Integration', 'Stripe Checkout', 'MeiliSearch'],
       category: 'website',
     },
     {
