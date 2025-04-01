@@ -59,7 +59,7 @@ export default async function PostLayout({
       <Sidetoc toc={tableOfContents} />
       {/* <RightToc toc={tableOfContents} /> */}
       <article>
-        <div className="xl:divide-y xl:divide-gray-200 xl:dark:divide-gray-700">
+        <div className="xl:dark:divide-gray-700">
           <header className="pt-6 xl:pb-6">
             <div className="space-y-1 text-center">
               <dl className="space-y-10">
@@ -189,12 +189,6 @@ export default async function PostLayout({
                 <BackNavigation locale={locale} basePath={basePath} backLabel={t('back')} />
               </div>
             </footer>
-            {/* 将 TableOfContents 移到这里 */}
-            <div className="hidden xl:block xl:col-start-4 xl:row-span-2">
-              <div className="sticky top-4 space-y-4">
-                <TableOfContents toc={tableOfContents} />
-              </div>
-            </div>
           </div>
           {/* ScrollProgress 移到文章容器外部 */}
           <div className="fixed bottom-0 left-0 right-0 z-10">

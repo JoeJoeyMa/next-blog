@@ -27,7 +27,7 @@ const ScrollProgress = () => {
           style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
         />
       </div>
-      <div className="mt-2 text-center text-xs text-gray-500 dark:text-gray-400">
+      <div className="mt-2 text-center text-sm font-bold text-gray-800 dark:text-gray-200">
         {Math.round(progress)}% read
       </div>
     </div>
