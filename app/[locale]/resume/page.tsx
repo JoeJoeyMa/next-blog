@@ -42,8 +42,8 @@ export const metadata: Metadata = {
 
 export default async function Page() {
   return (
-    <div className="relative whitespace-nowrap">
-      <div className="flex w-full flex-row justify-end">
+    <div className="relative">
+      <div className="flex w-full flex-row justify-end mb-2">
         <button className="focus:ring-ring text-primary ml-0 inline-flex max-w-full items-center rounded-tl-2xl border border-primary-500 bg-transparent px-2.5 py-0.5 text-xs font-semibold backdrop-blur-md transition-colors duration-150 hover:bg-primary-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 sm:ml-0 sm:text-sm md:ml-0 md:text-base">
           <a href="./mason-front.pdf" download>
             Download File
@@ -53,7 +53,9 @@ export default async function Page() {
           <a href="./mason-front.pdf">View in Native</a>
         </button>
       </div>
-      <Resume filename="./mason-front.pdf" />
+      <div className="max-w-9xl mx-auto">
+        <Resume filename="./mason-front.pdf" />
+      </div>
     </div>
   )
 }
