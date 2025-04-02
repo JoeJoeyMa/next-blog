@@ -26,5 +26,8 @@
   "github": "在 GitHub 上查看",
   "draft": "草稿",
   "noposts": "未找到文章",
-  "poststagged": "查看标记的文章"
+  "poststagged": "查看标记的文章",
+  "guestbook": "留言板",
+  "guestbook_description": "在我的留言板上签名并留言！",
+  "show_guestbook": "显示留言板"
 }

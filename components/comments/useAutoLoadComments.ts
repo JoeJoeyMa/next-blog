@@ -10,12 +10,15 @@ export function useAutoLoadComments() {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && !loadComments) {
-          setLoadComments(true)
-          observer.disconnect()
+          setTimeout(() => {
+            setLoadComments(true)
+            observer.disconnect()
+          }, 800)
         }
       },
       {
-        threshold: 0.1, // Trigger when 10% of the element is visible
+        threshold: 0.05,
+        rootMargin: '0px 0px 200px 0px'
       }
     )
 

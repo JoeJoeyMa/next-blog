@@ -23,5 +23,8 @@
   "github": "View on GitHub",
   "draft": "Under Construction",
   "noposts": "No posts found",
-  "poststagged": "View posts tagged"
+  "poststagged": "View posts tagged",
+  "guestbook": "Guestbook",
+  "guestbook_description": "Sign my guestbook and leave a message!",
+  "show_guestbook": "Show Guestbook"
 }
