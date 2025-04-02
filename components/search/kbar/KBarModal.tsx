@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import { useParams, usePathname, useRouter } from 'next/navigation'
 import { useTranslation } from 'app/[locale]/i18n/client'
-import { useTheme } from '@/components/theme/ThemeContext'
+import { useTheme } from 'next-themes'
 import { useTagStore } from '@/components/util/useTagStore'
 import { useContactForm } from '@/components/formspree/useContactForm'
 import { useRegisterActions } from 'kbar'
@@ -11,7 +11,7 @@ import Settings from './Settings'
 import Button from './Button'
 import CopyButton from './CopyButton'
 import RenderResults from './RenderResults'
-import { KBarPortal, KBarAnimator, KBarPositioner, KBarSearch } from 'kbar'
+import { KBarPortal, KBarAnimator, KBarPositioner, KBarSearch, KBarResults } from 'kbar'
 import { Toaster } from 'react-hot-toast'
 import { SearchIcon, MailIcon, SettingsIcon } from '../icons'
 import { LocaleTypes, locales } from 'app/[locale]/i18n/settings'
@@ -41,10 +41,14 @@ export const KBarModal: React.FC<KBarModalProps> = ({ actions, isLoading }) => {
     handleMessageChange,
   } = useContactForm()
 
-  const { setTheme, mounted } = useTheme()
+  const { theme, setTheme, resolvedTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
   const [showEmailForm, setShowEmailForm] = useState<boolean>(false)
   const [showSettings, setShowSettings] = useState<boolean>(false)
   const [showCopied, setShowCopied] = useState<boolean>(false)
+
+  // Mount check for handling client-side only rendering
+  React.useEffect(() => setMounted(true), [])
 
   const toggleShowEmail = () => {
     if (siteMetadata.formspree) {

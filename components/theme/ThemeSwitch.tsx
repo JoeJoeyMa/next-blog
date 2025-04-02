@@ -12,7 +12,7 @@ import {
 } from '@headlessui/react'
 import { DarkModeSwitch } from './DarkModeSwitch'
 import { Monitor, Moon, Sun } from './icons'
-import { useTheme } from './ThemeContext'
+import { useTheme } from 'next-themes'
 import { useOuterClick } from '../util/useOuterClick'
 import { useParams } from 'next/navigation'
 import { LocaleTypes } from 'app/[locale]/i18n/settings'
@@ -21,14 +21,24 @@ import { useTranslation } from 'app/[locale]/i18n/client'
 const ThemeSwitch = () => {
   const locale = useParams()?.locale as LocaleTypes
   const { t } = useTranslation(locale, 'common')
-  const { theme, setTheme, mounted } = useTheme()
+  const { theme, setTheme, resolvedTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
   const [menuOpen, setMenuOpen] = useState<boolean>(false)
-  const [darkModeChecked, setDarkModeChecked] = useState<boolean>(theme === 'dark')
+  const [darkModeChecked, setDarkModeChecked] = useState<boolean>(false)
   const menubarRef = useRef<HTMLDivElement>(null)
 
   useOuterClick(menubarRef, () => setMenuOpen(false))
 
-  useEffect(() => {    setDarkModeChecked(      theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)    );  }, [theme]);
+  // Only show the UI after mounting to prevent hydration mismatch
+  useEffect(() => setMounted(true), [])
+
+  useEffect(() => {
+    if (mounted) {
+      setDarkModeChecked(
+        resolvedTheme === 'dark'
+      )
+    }
+  }, [mounted, resolvedTheme])
 
   const handleThemeChange = (newTheme: string) => {
     setTheme(newTheme)

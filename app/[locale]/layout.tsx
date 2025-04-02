@@ -9,12 +9,12 @@ import SectionContainer from '@/components/SectionContainer'
 import Footer from '@/components/navigation/Footer'
 import siteMetadata from '@/data/siteMetadata'
 import { maintitle, maindescription } from '@/data/localeMetadata'
-import { ThemeProvider } from '@/components/theme/ThemeContext'
 import { Metadata } from 'next'
 import { dir } from 'i18next'
 import { LocaleTypes, locales } from './i18n/settings'
 import TwSizeIndicator from '@/components/helper/TwSizeIndicator'
 import Script from 'next/script'
+import { ThemeProviders } from './theme-providers'
 
 
 export async function generateStaticParams() {
@@ -99,7 +99,7 @@ export default function RootLayout({
         <div className="bg-[#ef8f6c] absolute top-[-6rem] -z-10 right-[11rem] h-[31.25rem] w-[31.25rem] rounded-full blur-[10rem] sm:w-[68.75rem] dark:bg-[#946263]"></div>
         <div className="bg-[#97bdf3] absolute top-[-1rem] -z-10 left-[-35rem] h-[31.25rem] w-[50rem] rounded-full blur-[10rem] sm:w-[68.75rem] md:left-[-33rem] lg:left-[-28rem] xl:left-[-15rem] 2xl:left-[-5rem] dark:bg-[#676394]"></div>
         <TwSizeIndicator />
-        <ThemeProvider>
+        <ThemeProviders>
           <Analytics analyticsConfig={siteMetadata.analytics as AnalyticsConfig} />
           <SectionContainer>
             <div className="flex h-screen flex-col justify-between font-sans">
@@ -110,7 +110,7 @@ export default function RootLayout({
               <Footer />
             </div>
           </SectionContainer>
-        </ThemeProvider>
+        </ThemeProviders>
       </body>
 
     </html>
