@@ -119,7 +119,7 @@ export default function BlogPage({ posts, locale }: BlogPageProps) {
                                 <span className={'mr-3 text-gray-300 dark:text-opacity-50'}>
                                   {formattedDate}
                                 </span>
-                                <Link href={`/blog/${post.slug}`}>
+                                <Link href={`/${locale}/blog/${post.slug}`}>
                                   <span
                                     className={
                                       'text-soto-100 hover:text-soto-200 dark:text-opacity-80'
