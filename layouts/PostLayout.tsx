@@ -144,7 +144,7 @@ export default async function PostLayout({
             <footer className="xl:sticky xl:top-[calc(0rem+0rem)] xl:col-start-1 xl:row-start-2 h-fit max-h-[calc(100vh-10rem)] overflow-y-auto">
               <div className="divide-gray-200 text-sm font-medium leading-5 dark:divide-gray-700 xl:divide-y">
                 {tags && (
-                  <div className="py-4 xl:py-8">
+                  <div className="py-4 xl:py-1">
                     <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
                       Tags
                     </p>
@@ -156,7 +156,7 @@ export default async function PostLayout({
                   </div>
                 )}
                 {(next || prev) && (
-                  <div className="flex justify-between py-4 xl:block xl:space-y-8 xl:py-8">
+                  <div className="flex justify-between py-4 xl:block xl:space-y-8 xl:py-1">
                     {prev && prev.slug && (
                       <div>
                         <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
