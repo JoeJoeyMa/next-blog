@@ -156,7 +156,7 @@ export default async function PostLayout({
                   </div>
                 )}
                 {(next || prev) && (
-                  <div className="flex justify-between py-4 xl:block xl:space-y-8 xl:py-1">
+                  <div className="flex justify-between py-4 xl:block xl:space-y-2 xl:py-1">
                     {prev && prev.slug && (
                       <div>
                         <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
