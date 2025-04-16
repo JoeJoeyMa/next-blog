@@ -188,11 +188,11 @@ export default async function PostLayout({
               <div className="pt-4 xl:pt-8 mb-8">
                 <BackNavigation locale={locale} basePath={basePath} backLabel={t('back')} />
               </div>
+              {/* ScrollProgress 固定在左侧栏底部 */}
+              <div className="fixed bottom-0 w-full xl:w-[calc((100%-1200px)/2+150px)] left-50 z-10">
+                <ScrollProgress />
+              </div>
             </footer>
-          </div>
-          {/* ScrollProgress 移到文章容器外部 */}
-          <div className="fixed bottom-0 left-0 right-0 z-10">
-            <ScrollProgress />
           </div>
         </div>
       </article>
