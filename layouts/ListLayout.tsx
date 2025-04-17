@@ -125,7 +125,7 @@ export default function ListLayoutWithTags({
                           {/* 左侧图片 */}
                           <Link
                             href={`/${locale}/blog/${slug}`}
-                            className="md:w-1/3 overflow-hidden rounded-xl shadow-md transition-all duration-300 hover:scale-105"
+                            className="md:w-1/3 h-full overflow-hidden rounded-xl shadow-md transition-all duration-300 hover:scale-105"
                             onClick={() => {
                               if (pagination?.currentPage) {
                                 sessionStorage.setItem('lastPageNumber', String(pagination.currentPage))
@@ -140,10 +140,11 @@ export default function ListLayoutWithTags({
                                 alt={`${title} - 封面图片`}
                                 width={800}
                                 height={450}
-                                className="aspect-video w-full object-cover"
+                                className="w-full h-full object-cover"
+                                priority
                               />
                             ) : (
-                              <div className="aspect-video w-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                              <div className="w-full h-full min-h-[200px] bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
                                 <span className="text-gray-500 dark:text-gray-400">No image</span>
                               </div>
                             )}

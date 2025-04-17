@@ -44,6 +44,7 @@ const TableOfContents = (props: TableOfContentsProps) => {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isAtBottom, setIsAtBottom] = useState<boolean>(false);
   const scrollListenerRef = useRef<number | null>(null);
+  const lastScrollYRef = useRef<number>(0);
   const lastActiveIdRef = useRef<string | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const activeTocRef = useRef<HTMLUListElement | null>(null);
@@ -59,13 +60,17 @@ const TableOfContents = (props: TableOfContentsProps) => {
     }
   };
 
-  // 监听页面滚动，检测是否接近底部
+  // 监听页面滚动，检测是否接近底部和滚动方向
   useEffect(() => {
     const handleScroll = () => {
       const atBottom = isNearBottom();
       if (atBottom !== isAtBottom) {
         setIsAtBottom(atBottom);
       }
+      
+      // 更新滚动方向
+      const currentScrollY = window.scrollY;
+      lastScrollYRef.current = currentScrollY;
     };
 
     // 使用 requestAnimationFrame 优化滚动性能

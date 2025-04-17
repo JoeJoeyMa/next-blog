@@ -42,19 +42,7 @@ export default function BlogPage({ posts, locale }: BlogPageProps) {
   return (
     <>
       <div className="space-y-10">
-        <div>
-          <PageTitle>Recent Posts</PageTitle>
-          <ul className={'grid gap-6 lg:grid-cols-2'} style={{ listStyle: `none` }}>
-            {showingPosts.map((post) => {
-              const { slug } = post
-              return (
-                <li key={slug}>
-                  <PostCard blog={post} locale={locale} />
-                </li>
-              )
-            })}
-          </ul>
-        </div>
+
 
         <div>
           <PageTitle>Tags</PageTitle>
@@ -138,6 +126,19 @@ export default function BlogPage({ posts, locale }: BlogPageProps) {
               </div>
             )
           })}
+        </div>
+        <div>
+          <PageTitle>Recent Posts</PageTitle>
+          <ul className={'grid gap-6 lg:grid-cols-2'} style={{ listStyle: `none` }}>
+            {showingPosts.map((post) => {
+              const { slug } = post
+              return (
+                <li key={slug}>
+                  <PostCard blog={post} locale={locale} />
+                </li>
+              )
+            })}
+          </ul>
         </div>
       </div>
     </>
