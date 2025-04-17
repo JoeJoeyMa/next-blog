@@ -20,6 +20,7 @@ import RightToc from '@/components/righttoc'
 import ScrollProgress from '@/components/scroll/ScrollProgress'
 import BackNavigation from '@/components/navigation/BackNavigation'
 import TableOfContents from '@/components/TableOfContents'
+import ImageWith3DEffect from '@/components/ImageWith3DEffect'
 
 const editUrl = (path) => `${siteMetadata.siteRepo}/blob/main/data/${path}`
 const discussUrl = (path) =>
@@ -49,7 +50,7 @@ export default async function PostLayout({
   children,
   params: { locale },
 }: LayoutProps) {
-  const { filePath, path, slug, date, title, tags, language, series, toc } = content
+  const { filePath, path, slug, date, title, tags, language, series, toc, images } = content
   const basePath = path.split('/')[0]
   const { t } = await createTranslation(locale, 'home')
   const tableOfContents: Toc = toc as unknown as Toc
@@ -75,6 +76,20 @@ export default async function PostLayout({
               <div>
                 <PageTitle>{title}</PageTitle>
               </div>
+              {/* 添加图片展示区域 - 只显示第一张图片 */}
+              {images && images.length > 0 && (
+                <div className="mt-6 flex justify-center">
+                  <div className="w-full max-w-3xl">
+                    <ImageWith3DEffect
+                      src={images[0]}
+                      alt={`${title} - 封面图片`}
+                      width={800}
+                      height={450}
+                      className="mx-auto"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </header>
           <div className="grid-rows-[auto_1fr] divide-y divide-gray-200 pb-8 dark:divide-gray-700 xl:grid xl:grid-cols-4 xl:gap-x-6 xl:divide-y-0">
