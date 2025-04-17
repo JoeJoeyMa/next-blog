@@ -21,6 +21,7 @@ import ScrollProgress from '@/components/scroll/ScrollProgress'
 import BackNavigation from '@/components/navigation/BackNavigation'
 import TableOfContents from '@/components/TableOfContents'
 import ImageWith3DEffect from '@/components/ImageWith3DEffect'
+import GrowingUnderline from '@/components/ui/GrowingUnderline'
 
 const editUrl = (path) => `${siteMetadata.siteRepo}/blob/main/data/${path}`
 const discussUrl = (path) =>
@@ -178,7 +179,11 @@ export default async function PostLayout({
                           {t('preva')}
                         </p>
                         <div className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400">
-                          <Link href={`/${locale}/blog/${prev.slug}`}>{prev.title}</Link>
+                          <Link href={`/${locale}/blog/${prev.slug}`}>
+                            <GrowingUnderline>
+                              {prev.title}
+                            </GrowingUnderline>
+                          </Link>
                         </div>
                       </div>
                     )}
@@ -188,7 +193,11 @@ export default async function PostLayout({
                           {t('nexta')}
                         </p>
                         <div className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400">
-                          <Link href={`/${locale}/blog/${next.slug}`}>{next.title}</Link>
+                          <Link href={`/${locale}/blog/${next.slug}`}>
+                            <GrowingUnderline>
+                              {next.title}
+                            </GrowingUnderline>
+                          </Link>
                         </div>
                       </div>
                     )}

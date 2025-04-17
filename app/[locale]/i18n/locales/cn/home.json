@@ -1,6 +1,6 @@
 {
-  "greeting": "最新",
-  "description": "一个使用 Next.js、i18n 和 Tailwind.css 创建的博客",
+  "greeting": "我的文章",
+  "description": "你好，朋友！",
   "more": "阅读更多",
   "all": "所有文章",
 

@@ -81,7 +81,7 @@ const Card: React.FC<CardProps> = ({ title, description, imgSrc, href, tags, fea
                 return (
                   <span
                     key={tag}
-                    className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                    className="rounded-md border-2 bg-gradient-to-r from-lime-500 to-yellow-400 bg-clip-text px-2 text-sm font-bold text-transparent"
                   >
                     {BrandIconsMap[iconType] && <BrandIcon type={iconType} className="h-4 w-4 inline-block mr-1" />}
                     {tag}

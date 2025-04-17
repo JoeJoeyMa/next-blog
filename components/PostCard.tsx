@@ -1,9 +1,10 @@
 import Link from '@/components/mdxcomponents/Link'
-import Image from 'next/image'
+import Image from '@/components/mdxcomponents/Image'
 import type { Blog, Authors } from 'contentlayer/generated'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import siteMetadata from '@/data/siteMetadata'
 import { LocaleTypes } from 'app/[locale]/i18n/settings'
+import GrowingUnderline from '@/components/ui/GrowingUnderline'
 
 interface PostCardProps {
   blog: CoreContent<Blog>
@@ -15,15 +16,25 @@ const PostCard = ({ blog, locale }: PostCardProps) => {
   return (
     <Link href={`/${locale}/blog/${slug}`}>
       <article className="mx-auto overflow-hidden rounded-xl shadow-md duration-300 hover:scale-105 dark:bg-dark-100">
-        <Image
-          src={images}
-          className="aspect-video w-full object-cover"
-          width={1600}
-          height={900}
-          alt={title || ''}
-        />
+        {images && images.length > 0 ? (
+          <Image
+            src={images[0]}
+            alt={`${title} - 封面图片`}
+            width={800}
+            height={450}
+            className="aspect-video w-full object-cover"
+          />
+        ) : (
+          <div className="aspect-video w-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+            <span className="text-gray-500 dark:text-gray-400">No image</span>
+          </div>
+        )}
         <div className="p-3">
-          <h2 className="text-xl font-extrabold">{title || slug}</h2>
+          <h2 className="text-xl font-extrabold">
+            <GrowingUnderline>
+              {title || slug}
+            </GrowingUnderline>
+          </h2>
           <section className="text-gray-500">
             <p>{summary}</p>
           </section>

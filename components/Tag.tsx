@@ -1,5 +1,7 @@
-import Link from 'next/link'
+import Link from '@/components/mdxcomponents/Link'
 import { slug } from 'github-slugger'
+import GrowingUnderline from '@/components/ui/GrowingUnderline'
+
 interface Props {
   text: string
 }
@@ -10,7 +12,9 @@ const Tag = ({ text }: Props) => {
       href={`/tags/${slug(text)}`}
       className="mr-3 text-sm font-medium uppercase text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
     >
-      {text.split(' ').join('-')}
+      <GrowingUnderline>
+        {text.split(' ').join('-')}
+      </GrowingUnderline>
     </Link>
   )
 }

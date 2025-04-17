@@ -7,6 +7,8 @@ import AuthorCard from '@/components/AuthorCard'
 import Wave from '@/components/wave'
 import Intro from '@/components/portfolio/intro'
 import Projects from '@/components/portfolio/projects'
+import TabSwitcher from '@/components/TabSwitcher'
+import { createTranslation } from './i18n/server'
 
 type HomeProps = {
   params: { locale: LocaleTypes }
@@ -19,15 +21,19 @@ export default async function Page({ params: { locale } }: HomeProps) {
   const hasFeaturedPosts = filteredPosts.filter((p) => p.featured === true)
   const author = allAuthors.find((p) => p.slug === 'default') as Authors
   const mainContent = coreContent(author)
+  const { t } = await createTranslation(locale, 'home')
 
   return (
     <>
-      <AuthorCard content={mainContent} />
+      <AuthorCard content={mainContent} locale={locale} />
       <Intro />
- 
       <Projects />
-      {hasFeaturedPosts && <FeaturedLayout posts={hasFeaturedPosts} params={{ locale }} />}
-      <HomeLayout posts={filteredPosts} params={{ locale }} />
+      <TabSwitcher
+        featuredContent={<FeaturedLayout posts={hasFeaturedPosts} params={{ locale }} />}
+        homeContent={<HomeLayout posts={filteredPosts} params={{ locale }} />}
+        featuredLabel={t('featured')}
+        homeLabel={t('greeting')}
+      />
       <Wave />
     </>
   )

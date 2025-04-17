@@ -15,6 +15,8 @@ import Pagination from './Pagination'
 import tagData from 'app/[locale]/tag-data.json'
 import { useTranslation } from 'app/[locale]/i18n/client'
 import { LocaleTypes } from 'app/[locale]/i18n/settings'
+import GrowingUnderline from '@/components/ui/GrowingUnderline'
+import Image from '@/components/mdxcomponents/Image'
 
 interface ListLayoutProps {
   params: { locale: LocaleTypes }
@@ -118,47 +120,83 @@ export default function ListLayoutWithTags({
                 if (language === locale) {
                   return (
                     <motion.li key={slug} variants={item} className="py-5">
-                      <article className="flex flex-col space-y-2 xl:space-y-0">
-                        <dl>
-                          <dt className="sr-only">{t('pub')}</dt>
-                          <dd className="text-base font-medium leading-6 text-gray-500 dark:text-gray-400">
-                            <time dateTime={date}>{formatDate(date, language)}</time>
-                          </dd>
-                        </dl>
-                        <div className="space-y-3">
-                          <div>
-                            <div className="text-2xl font-bold leading-8 tracking-tight">
-                              <Link
-                                href={`/${locale}/blog/${slug}`}
-                                className="text-gray-900 dark:text-gray-100"
-                                aria-labelledby={title}
-                                onClick={() => {
-                                  if (pagination?.currentPage) {
-                                    sessionStorage.setItem('lastPageNumber', String(pagination.currentPage))
-                                  } else {
-                                    sessionStorage.removeItem('lastPageNumber')
-                                  }
-                                }}
-                              >
-                                <h2>{title}</h2>
-                              </Link>
-                            </div>
-                            <ul className="flex flex-wrap">
-                              {tags.map((t) => (
-                                <li key={t} className="my-3">
-                                  <button
-                                    onClick={() => handleTagClick(t)}
-                                    className="text-primary-500 hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-500 mr-3 text-sm font-medium uppercase"
-                                    aria-label={`View posts tagged ${t}`}
+                      <article>
+                        <div className="flex flex-col md:flex-row gap-6">
+                          {/* 左侧图片 */}
+                          <Link
+                            href={`/${locale}/blog/${slug}`}
+                            className="md:w-1/3 overflow-hidden rounded-xl shadow-md transition-all duration-300 hover:scale-105"
+                            onClick={() => {
+                              if (pagination?.currentPage) {
+                                sessionStorage.setItem('lastPageNumber', String(pagination.currentPage))
+                              } else {
+                                sessionStorage.removeItem('lastPageNumber')
+                              }
+                            }}
+                          >
+                            {post.images && post.images.length > 0 ? (
+                              <Image
+                                src={post.images[0]}
+                                alt={`${title} - 封面图片`}
+                                width={800}
+                                height={450}
+                                className="aspect-video w-full object-cover"
+                              />
+                            ) : (
+                              <div className="aspect-video w-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                <span className="text-gray-500 dark:text-gray-400">No image</span>
+                              </div>
+                            )}
+                          </Link>
+
+                          {/* 右侧内容 */}
+                          <div className="md:w-2/3 space-y-2">
+                            <dl>
+                              <dt className="sr-only">{t('pub')}</dt>
+                              <dd className="text-base font-medium leading-6 text-gray-500 dark:text-gray-400">
+                                <time dateTime={date}>{formatDate(date, language)}</time>
+                              </dd>
+                            </dl>
+                            <div className="space-y-3">
+                              <div>
+                                <div className="text-2xl font-bold leading-8 tracking-tight">
+                                  <Link
+                                    href={`/${locale}/blog/${slug}`}
+                                    className="text-gray-900 dark:text-gray-100"
+                                    aria-labelledby={title}
+                                    onClick={() => {
+                                      if (pagination?.currentPage) {
+                                        sessionStorage.setItem('lastPageNumber', String(pagination.currentPage))
+                                      } else {
+                                        sessionStorage.removeItem('lastPageNumber')
+                                      }
+                                    }}
                                   >
-                                    {t}
-                                  </button>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                          <div className="prose max-w-none text-gray-500 dark:text-gray-400">
-                            {summary!.length > 149 ? `${summary!.substring(0, 149)}...` : summary}
+                                    <h2>
+                                      <GrowingUnderline>
+                                        {title}
+                                      </GrowingUnderline>
+                                    </h2>
+                                  </Link>
+                                </div>
+                                <ul className="flex flex-wrap">
+                                  {tags.map((t) => (
+                                    <li key={t} className="my-3">
+                                      <button
+                                        onClick={() => handleTagClick(t)}
+                                        className="text-primary-500 hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-500 mr-3 text-sm font-medium uppercase"
+                                        aria-label={`View posts tagged ${t}`}
+                                      >
+                                        {t}
+                                      </button>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                              <div className="prose max-w-none text-gray-500 dark:text-gray-400">
+                                {summary!.length > 149 ? `${summary!.substring(0, 149)}...` : summary}
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </article>

@@ -5,6 +5,7 @@ import { createTranslation } from '../app/[locale]/i18n/server'
 import { LocaleTypes } from '../app/[locale]/i18n/settings'
 import PostList from './home/PostList'
 import LayoutHeader from './home/LayoutHeader'
+import GrowingUnderline from '@/components/ui/GrowingUnderline'
 
 interface Post {
   slug: string
@@ -36,9 +37,12 @@ export default async function HomeLayout({ posts, params: { locale } }: HomeProp
           <Link
             href={`/${locale}/blog`}
             className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+            
             aria-label={t('all')}
           >
-            {t('all')} &rarr;
+            <GrowingUnderline>
+              {t('all')} &rarr;
+            </GrowingUnderline>
           </Link>
         </div>
       )}
