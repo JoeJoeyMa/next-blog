@@ -5,6 +5,7 @@ import Image from '@/components/mdxcomponents/Image'
 
 import { LocaleTypes } from 'app/[locale]/i18n/settings'
 import { createTranslation } from 'app/[locale]/i18n/server'
+import ImageWith3DEffect from '@/components/ImageWith3DEffect'
 
 interface AuthorLayoutProps {
   children: ReactNode
@@ -31,7 +32,7 @@ export default async function AuthorLayout({
         <div className="items-start space-y-2 xl:grid xl:grid-cols-3 xl:gap-x-8 xl:space-y-0">
           <div className="flex flex-col items-center space-x-2 pt-8">
             {avatar && (
-              <Image
+              <ImageWith3DEffect
                 src={avatar}
                 alt="avatar"
                 title="avatar"

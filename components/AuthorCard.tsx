@@ -1,17 +1,32 @@
 import Image from './Image'
+import ImageWith3DEffect from './ImageWith3DEffect'
 import SocialIcon from '@/components/social-icons'
 import siteMetadata from '@/data/siteMetadata'
 import { RoughNotation } from 'react-rough-notation'
+import ColorfulTag from './ColorfulTag'
+import tagData from 'app/[locale]/tag-data.json'
 
-const AuthorCard = ({ content }) => {
+interface AuthorCardProps {
+  content?: any
+  locale: string
+}
+
+const AuthorCard = ({ content, locale = 'en' }: AuthorCardProps) => {
   const { author, avatar, occupation, qualifications, email, x, linkedin, github, location } =
     siteMetadata
+
+  // 确保使用有效的 locale，如果无效则默认使用 en
+  const currentLocale = locale in tagData ? locale : 'en'
+  const currentTagData = tagData[currentLocale]
+  const tagKeys = Object.keys(currentTagData || {})
+  const sortedTags = tagKeys.sort((a, b) => currentTagData[b] - currentTagData[a])
+
   return (
     <div>
       <div className="flex flex-row items-center justify-center space-x-2 pb-8">
         {avatar && (
           <div className="pr-2 xl:pr-4">
-            <Image
+            <ImageWith3DEffect
               src={avatar}
               alt="avatar"
               width={224}
@@ -62,36 +77,16 @@ const AuthorCard = ({ content }) => {
             developer.
           </p>
           <div className="py-4">
-            <span className="m-2 inline-block rounded-full bg-teal-200 px-2 py-1 text-sm text-teal-900">
-              Frameworks
-            </span>
-            <span className="m-2 inline-block rounded-full  bg-indigo-200 px-2 py-1 text-sm text-indigo-900">
-              DevOps
-            </span>
-            <span className="m-2 inline-block rounded-full  bg-blue-200 px-2 py-1 text-sm text-blue-900">
-              Cloud Platforms
-            </span>
-            <span className="m-2 inline-block rounded-full  bg-purple-200 px-2 py-1 text-sm text-purple-900">
-              Optimized
-            </span>
-            <span className="m-2 inline-block rounded-full  bg-red-200 px-2 py-1 text-sm text-red-900">
-              Designed
-            </span>
-            <span className="m-2 inline-block rounded-full  bg-green-200 px-2 py-1 text-sm text-green-900">
-              animations
-            </span>
-            <span className="m-2 inline-block rounded-full  bg-orange-200 px-2 py-1 text-sm text-orange-900">
-              Integrated
-            </span>
-            <span className="m-2 inline-block rounded-full  bg-fuchsia-200 px-2 py-1 text-sm text-fuchsia-900">
-              dynamic
-            </span>
-            <span className="m-2 inline-block rounded-full  bg-lime-200 px-2 py-1 text-sm text-lime-900">
-              Testing
-            </span>
-            <span className="m-2 inline-block rounded-full  bg-amber-200 px-2 py-1 text-sm text-amber-900">
-              Compliance Management
-            </span>
+            <div className="flex flex-wrap gap-3">
+              {sortedTags.map((tag) => (
+                <ColorfulTag 
+                  key={tag} 
+                  text={tag} 
+                  count={currentTagData[tag]} 
+                  locale={currentLocale} 
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>
