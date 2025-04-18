@@ -64,7 +64,7 @@ module.exports = () => {
       remotePatterns: [
         {
           protocol: 'https',
-          hostname: 'unsplash.com',
+          hostname: '*.unsplash.com',
           pathname: '**',
         },
         {

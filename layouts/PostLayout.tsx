@@ -79,12 +79,12 @@ export default async function PostLayout({
                 </div>
                 {images && images.length > 0 && (
                   <div className="mt-6 flex justify-center">
-                    <div className="w-full max-w-3xl">
+                    <div className="w-[768px]">
                       <ImageWith3DEffect
                         src={images[0]}
                         alt={`${title} - 封面图片`}
-                        width={800}
-                        height={450}
+                        width={768}
+                        height={560}
                         className="mx-auto"
                       />
                     </div>

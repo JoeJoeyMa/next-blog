@@ -135,16 +135,18 @@ export default function ListLayoutWithTags({
                             }}
                           >
                             {post.images && post.images.length > 0 ? (
-                              <Image
-                                src={post.images[0]}
-                                alt={`${title} - 封面图片`}
-                                width={800}
-                                height={450}
-                                className="w-full h-full object-cover"
-                                priority
-                              />
+                              <div className="relative w-[294px] h-[164px]">
+                                <Image
+                                  src={post.images[0]}
+                                  alt={`${title} - 封面图片`}
+                                  width={294}
+                                  height={164}
+                                  className="object-cover"
+                                  priority
+                                />
+                              </div>
                             ) : (
-                              <div className="w-full h-full min-h-[200px] bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                              <div className="w-[294px] h-[164px] bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
                                 <span className="text-gray-500 dark:text-gray-400">No image</span>
                               </div>
                             )}
