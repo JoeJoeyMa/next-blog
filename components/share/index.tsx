@@ -37,9 +37,9 @@ const Share = ({ title, description, slug, className }: ShareProps) => {
   }
 
   return (
-    <div className="m-4 mt-8 flex flex-col items-center justify-center pt-4 sm:flex-row">
+    <div className="m-1 mt-1 flex flex-col items-center justify-center pt-1 sm:flex-row">
       <div className="mb-4 sm:mb-0">
-        <p className="text-highlighted dark:text-darkmode-highlighted mr-3 px-4 font-bold text-primary-500 sm:border-r-2">
+        <p className="text-highlighted dark:text-darkmode-highlighted mr-1 px-1 font-bold text-primary-500 sm:border-r-2">
           {t('share')}
         </p>
       </div>

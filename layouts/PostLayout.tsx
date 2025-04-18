@@ -144,7 +144,6 @@ export default async function PostLayout({
                   <div className="divide-gray-200 text-sm font-medium leading-5 dark:divide-gray-700 xl:divide-y">
                     <PostTableOfContents 
                       toc={tableOfContents} 
-                      className="h-fit max-h-[calc(40vh)] overflow-y-auto bg-white dark:bg-gray-900 shadow-lg rounded-lg p-4"
                     />
                   </div>
                 </div>

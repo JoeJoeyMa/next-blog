@@ -241,7 +241,7 @@ const PostTableOfContents = (props: PostTableOfContentsProps) => {
 
   return (
     <div className={clsx('relative', className)}>
-      <ul className="flex flex-col space-y-2">
+      <ul className="h-fit max-h-[calc(40vh)] overflow-y-auto bg-white dark:bg-gray-900 shadow-lg rounded-lg p-4">
         <li className="text-lg font-medium mb-4">Table of Contents</li>
         {toc.map(({ value, depth, url }) => {
           const cleanUrl = url.replace(/-\d+$/, '');
