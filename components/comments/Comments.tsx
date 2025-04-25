@@ -21,25 +21,12 @@ export default function Comments({ slug }: CommentsProps) {
     return null
   }
 
-  const giscusConfig = siteMetadata.comments.giscusConfig
-  if (!giscusConfig) {
-    console.error('Comments: giscusConfig is undefined')
-    return null
-  }
 
   return (
     <div>
       <div 
         data-giscus-loading="eager"
         data-giscus-emit-metadata="1"
-        data-giscus-repo={giscusConfig.repo}
-        data-giscus-repo-id={giscusConfig.repositoryId}
-        data-giscus-category={giscusConfig.category}
-        data-giscus-category-id={giscusConfig.categoryId}
-        data-giscus-mapping={giscusConfig.mapping}
-        data-giscus-reactions-enabled={giscusConfig.reactions}
-        data-giscus-theme={giscusConfig.theme}
-        data-giscus-lang={giscusConfig.lang}
         data-giscus-metadata="1"
         data-giscus-lazy-loading="false"
         data-giscus-input-position="top"
