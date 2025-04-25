@@ -25,6 +25,7 @@ import GrowingUnderline from '@/components/ui/GrowingUnderline'
 import PostFooter from '@/components/PostFooter'
 import PostNavigation from '@/components/navigation/PostNavigation'
 import PostTableOfContents from '@/components/TableOfContents/PostTableOfContents'
+import CommentCount from '@/components/comments/CommentCount'
 
 const postDateTemplate: Intl.DateTimeFormatOptions = {
   weekday: 'long',
@@ -76,6 +77,7 @@ export default async function PostLayout({
                 </dl>
                 <div>
                   <PageTitle>{title}</PageTitle>
+                  {/* {siteMetadata.comments && siteMetadata.iscomments === true && <CommentCount />} */}
                 </div>
                 {images && images.length > 0 && (
                   <div className="mt-6 flex justify-center">
