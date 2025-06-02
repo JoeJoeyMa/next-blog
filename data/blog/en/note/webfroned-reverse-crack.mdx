@@ -1,0 +1,506 @@
+---
+title: "Frontend Reverse Engineering: A Comprehensive Analysis from Webpack/Vite Bundling to Slider CAPTCHA and Public-Private Key Encryption"
+date: "2024-12-18"
+authors: ['MASON']
+language: en
+summary: "An in-depth exploration of frontend reverse engineering practices, including Webpack/Vite bundled code analysis, slider CAPTCHA automation, RSA encryption implementation, and how to apply these technologies in real projects."
+tags: ["Frontend", "Reverse Engineering", "Webpack", "Vite", "Encryption", "CAPTCHA", "JavaScript", "Node.js", "Python", "Security", "Automation"]
+images: ['']
+layout: PostLayout
+---
+
+# Frontend Reverse Engineering: A Comprehensive Analysis from Webpack/Vite Bundling to Slider CAPTCHA and Public-Private Key Encryption
+
+## 1. Overview of Frontend Reverse Engineering
+
+Frontend reverse engineering refers to analyzing JavaScript code running in browsers, extracting key logic (such as encryption algorithms and CAPTCHA verification), and reusing it in other environments (like Node.js). With the widespread use of modern bundling tools like Webpack and Vite, frontend code is typically compressed and obfuscated, increasing the difficulty of reverse engineering. This article demonstrates a complete reverse engineering process using a case study of Tonghuashun's login slider verification, combined with Webpack code extraction techniques.
+
+### 1.1 Reverse Engineering Goals
+
+- **Tonghuashun Login Slider Reverse Engineering**: Extract encryption parameters (such as `uname`, `passwdSalt`) and slider CAPTCHA verification logic from the login process to achieve automated login.
+- **Webpack Code Extraction**: Port Webpack-bundled browser code to Node.js environment to call key functions (such as MD5, RSA encryption).
+- **Public-Private Key Encryption**: Analyze RSA encryption implementation and discuss the security implications of fixed public key exponents.
+- **Slider CAPTCHA**: Understand why CAPTCHA can be represented by data and implement automated recognition.
+
+### 1.2 Tool Preparation
+
+- **Browser Developer Tools**:
+  - Chrome/Firefox DevTools for analyzing network requests and JavaScript code
+  - Use Network panel to monitor API requests
+  - Use Sources panel for code debugging
+  - Use Console panel to execute test code
+
+- **Deobfuscation Tools**:
+  - [de4js](https://de4js.com/): Beautify compressed code
+  - [JS Beautifier](https://beautifier.io/): Format JavaScript
+  - [AST Explorer](https://astexplorer.net/): Analyze code structure
+
+- **Source Map Tools**:
+  - `unwebpack-sourcemap`: Restore Webpack Source Map
+  - `source-map-explorer`: Analyze bundle structure
+  - `webpack-bundle-analyzer`: Visualize dependencies
+
+- **Packet Capture Tools**:
+  - Fiddler: Windows platform packet capture
+  - Burp Suite: Cross-platform packet capture with HTTPS support
+  - Charles: Mac platform packet capture
+
+- **Image Processing**:
+  - Python's `ddddocr`: OCR recognition
+  - `Pillow`: Image processing
+  - `OpenCV`: Computer vision
+
+- **Node.js Environment**:
+  - Run reverse-engineered code
+  - Reuse Webpack modules
+  - Simulate browser environment
+
+---
+
+## 2. Reverse Engineering Webpack and Vite Bundled Code
+
+### 2.1 Webpack Bundling Characteristics
+
+Webpack is a commonly used frontend module bundler that packages JavaScript, CSS, and other resources into bundle files (like `main.js`). Its characteristics include:
+
+- **Modularity**:
+  - Uses `__webpack_require__` to load modules
+  - Modules organized by numeric IDs (like `1337`)
+  - Stored in `window.webpackChunk` or `__webpack_modules__`
+
+- **Compression and Obfuscation**:
+  - Uses Terser for code compression in production mode
+  - Shortens variable names
+  - Renames functions
+  - Removes comments and whitespace
+
+- **Source Map**:
+  - Generates `.map` files in development mode
+  - Contains original code mapping
+  - Supports debugging and error tracking
+
+- **Dynamic Import**:
+  - Supports code splitting
+  - Generates chunk files (like `chunk-xxx.js`)
+  - Optimizes performance through on-demand loading
+
+### 2.2 Vite Bundling Characteristics
+
+Vite is based on ES modules (ESM) and Rollup, with the following characteristics:
+
+- **ESM-Driven**:
+  - Uses browser native modules directly in development
+  - Uses Rollup for production bundling
+  - Faster development server startup
+
+- **Clean Bundle**:
+  - Clearer code structure compared to Webpack
+  - Lower obfuscation level
+  - Better readability
+
+- **Dependency Pre-bundling**:
+  - Bundles `node_modules` dependencies into `dist/assets`
+  - Uses esbuild for pre-building
+  - Improves development environment performance
+
+### 2.3 Reverse Engineering Steps
+
+#### 2.3.1 Obtaining Frontend Resources
+
+- **Open DevTools**:
+  ```javascript
+  // Disable F12 detection
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'F12') {
+      e.preventDefault();
+    }
+  });
+  ```
+
+- **Extract Source Map**:
+  ```bash
+  # Install tools
+  npm install -g unwebpack-sourcemap
+  
+  # Restore code
+  unwebpack-sourcemap main.js.map
+  
+  # Analyze bundle
+  npx source-map-explorer main.js.map
+  ```
+
+#### 2.3.2 Deobfuscate Code
+
+- **Use de4js**:
+  ```javascript
+  // Compressed code
+  function a(b,c){return b+c}
+  
+  // Beautified
+  function add(num1, num2) {
+    return num1 + num2;
+  }
+  ```
+
+#### 2.3.3 Locate Key Logic
+
+- **Search Keywords**:
+  ```javascript
+  // Search in Tonghuashun case
+  thsencrypt
+  passwdsalt
+  ```
+
+- **Breakpoint Debugging**:
+  ```javascript
+  // Set conditional breakpoint in DevTools
+  if (plaintext === 'user@example.com') {
+    debugger;
+  }
+  ```
+
+- **Module Structure**:
+  ```javascript
+  // Webpack module registration
+  (window.webpackChunk = window.webpackChunk || []).push([[245], {
+    245: (module, exports, __webpack_require__) => {
+      module.exports = { 
+        encode: function(plaintext) {
+          // Encryption logic
+        } 
+      };
+    }
+  }]);
+  ```
+
+#### 2.3.4 Extract Webpack Runtime
+
+- **Locate __webpack_require__**:
+  ```javascript
+  function __webpack_require__(moduleId) {
+    var cachedModule = __webpack_module_cache__[moduleId];
+    if (cachedModule !== undefined) {
+      return cachedModule.exports;
+    }
+    var module = __webpack_module_cache__[moduleId] = { exports: {} };
+    __webpack_modules__[moduleId].call(
+      module.exports, 
+      module, 
+      module.exports, 
+      __webpack_require__
+    );
+    return module.exports;
+  }
+  ```
+
+- **Global Export**:
+  ```javascript
+  // Add global access
+  globalThis.__exposedWebpackRequire = __webpack_require__;
+  ```
+
+#### 2.3.5 Collect Dependency Modules
+
+- **Set Log Breakpoints**:
+  ```javascript
+  // Add logging to __webpack_require__
+  window.module_array += moduleId + ':' + __webpack_modules__[moduleId] + ',\n';
+  
+  // Clear cache to force loading
+  __webpack_module_cache__ = {};
+  ```
+
+#### 2.3.6 Environment Patching
+
+- **Simulate Browser Environment**:
+  ```javascript
+  // Node.js environment patches
+  global.self = global;
+  global.window = global;
+  global.navigator = { 
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' 
+  };
+  global.document = {
+    createEvent: () => ({ 
+      timeStamp: Number(process.hrtime.bigint() / 1_000_000n) 
+    })
+  };
+  ```
+
+#### 2.3.7 Run in Node.js
+
+- **Write Run Script**:
+  ```javascript
+  // run_encrypt.js
+  global.self = global;
+  require('./main.bundle.js');
+  require('./chunk-xxx.js');
+  
+  let __webpack_require__ = globalThis.__exposedWebpackRequire;
+  let module_xxx = __webpack_require__('xxx');
+  console.log(module_xxx.encode('user@example.com'));
+  ```
+
+---
+
+## 3. Tonghuashun Login Slider Reverse Engineering
+
+### 3.1 Background
+
+Tonghuashun login involves account password encryption and slider CAPTCHA verification. The core goals are:
+Encrypt uname and passwdSalt parameters and send them to getGS and dologinreturnjson2 interfaces.
+Automatically recognize slider CAPTCHA and generate verification parameters (such as phrase and signature).
+
+### 3.2 Encryption Logic
+
+#### 3.2.1 RSA Encryption
+
+Frontend Implementation: Uses thsencrypt.encode function, based on RSA algorithm to encrypt account and password:
+
+```javascript
+var thsencrypt = {
+  encode: function(plaintext, modulus_hex, exponent_hex) {
+    var rsa = new JSEncrypt();
+    rsa.setPublicKey(modulus_hex, exponent_hex);
+    return rsa.encrypt(plaintext);
+  }
+};
+var uname = thsencrypt.encode('user@example.com', 'YOUR_MODULUS', '10001');
+```
+
+Python Implementation:
+
+```python
+from Crypto.PublicKey import RSA
+from Crypto.Cipher import PKCS1_v1_5
+from base64 import b64encode
+
+def encrypt_encode(plaintext: str) -> str:
+    modulus_hex = "YOUR_MODULUS_HERE"  # Get from getGS
+    exponent_hex = "10001"
+    modulus = int(modulus_hex, 16)
+    exponent = int(exponent_hex, 16)
+    key = RSA.construct((modulus, exponent))
+    cipher = PKCS1_v1_5.new(key)
+    plaintext_bytes = plaintext.encode('utf-8')
+    encrypted_bytes = cipher.encrypt(plaintext_bytes)
+    return b64encode(encrypted_bytes).decode('utf-8')
+```
+
+Password Encryption: Password is first encrypted with MD5:
+
+```python
+import hashlib
+def hex_md5(text: str) -> str:
+    return hashlib.md5(text.encode('utf-8')).hexdigest().lower()
+passwd_md5 = hex_md5('mypassword')
+passwd_encrypted = encrypt_encode(passwd_md5)
+```
+
+#### 3.2.2 passwdSalt Generation
+
+Logic: Involves MD5, HmacSHA256, and XOR operations:
+
+```python
+import hmac
+import hashlib
+from base64 import b64decode, b64encode
+
+def get_str_xor(e: str, t: str) -> str:
+    s = len(e)
+    r = len(t)
+    o = []
+    for d in range(s):
+        n = d % r
+        xor_char = chr(ord(e[d]) ^ ord(t[n]))
+        o.append(xor_char)
+    return ''.join(o)
+
+def encode_data_salt_once(passwd: str, uname: str, crnd: str, dsk: str, ssv: str, dsv: str) -> str:
+    n = hashlib.sha256((crnd + dsk).encode('utf-8')).hexdigest()
+    ssv_decoded = b64decode(ssv).decode('utf-8')
+    n = get_str_xor(n, ssv_decoded)
+    passwd_md5 = hex_md5(passwd)
+    n = hmac.new(n.encode('utf-8'), passwd_md5.encode('utf-8'), hashlib.sha256).hexdigest()
+    dsv_sha256 = hashlib.sha256(dsv.encode('utf-8')).hexdigest()
+    n = get_str_xor(n, dsv_sha256)
+    n = b64encode(n.encode('utf-8')).decode('utf-8')
+    return encrypt_encode(n)
+```
+
+### 3.3 Slider CAPTCHA Implementation
+
+#### 3.3.1 CAPTCHA Analysis
+
+The core of slider CAPTCHA is verifying whether the user's sliding trajectory is legitimate. Main verification points include:
+
+1. **Trajectory Data**:
+   - Sliding distance
+   - Sliding time
+   - Acceleration changes
+   - Trajectory point distribution
+
+2. **Feature Extraction**:
+   ```python
+   def extract_track_features(track_points):
+       features = {
+           'distance': calculate_distance(track_points),
+           'duration': track_points[-1]['timestamp'] - track_points[0]['timestamp'],
+           'acceleration': calculate_acceleration(track_points),
+           'point_count': len(track_points)
+       }
+       return features
+   ```
+
+3. **Trajectory Generation**:
+   ```python
+   def generate_human_like_track(distance: int) -> List[Dict]:
+       track = []
+       current_x = 0
+       current_time = int(time.time() * 1000)
+       
+       # Initial acceleration
+       for i in range(5):
+           current_x += random.randint(2, 4)
+           current_time += random.randint(10, 20)
+           track.append({'x': current_x, 'y': 0, 'timestamp': current_time})
+           
+       # Constant speed sliding
+       while current_x < distance - 10:
+           current_x += random.randint(1, 3)
+           current_time += random.randint(15, 25)
+           track.append({'x': current_x, 'y': 0, 'timestamp': current_time})
+           
+       # Deceleration
+       while current_x < distance:
+           current_x += random.randint(0, 2)
+           current_time += random.randint(20, 30)
+           track.append({'x': current_x, 'y': 0, 'timestamp': current_time})
+           
+       return track
+   ```
+
+#### 3.3.2 CAPTCHA Bypass
+
+1. **Image Recognition**:
+   ```python
+   import ddddocr
+   
+   def get_slider_distance(bg_image: bytes, slider_image: bytes) -> int:
+       ocr = ddddocr.DdddOcr(det=False, ocr=False, show_ad=False)
+       res = ocr.slide_match(bg_image, slider_image, simple_target=True)
+       return res['target'][0]
+   ```
+
+2. **Trajectory Optimization**:
+   ```python
+   def optimize_track(track: List[Dict], target_distance: int) -> List[Dict]:
+       # Adjust trajectory point distribution
+       optimized = []
+       for point in track:
+           # Add random offset
+           point['y'] = random.randint(-2, 2)
+           # Adjust time intervals
+           point['timestamp'] += random.randint(-5, 5)
+           optimized.append(point)
+       return optimized
+   ```
+
+3. **Request Construction**:
+   ```python
+   def construct_verify_request(track: List[Dict], distance: int) -> Dict:
+       return {
+           'phrase': base64.b64encode(json.dumps(track).encode()).decode(),
+           'signature': calculate_signature(track, distance),
+           'distance': distance
+       }
+   ```
+
+### 3.4 Complete Login Process
+
+```python
+async def login(username: str, password: str) -> Dict:
+    # 1. Get encryption parameters
+    gs_response = await get_gs()
+    modulus = gs_response['modulus']
+    crnd = gs_response['crnd']
+    
+    # 2. Encrypt username and password
+    encrypted_username = encrypt_encode(username, modulus)
+    encrypted_password = encrypt_encode(hex_md5(password), modulus)
+    
+    # 3. Generate passwdSalt
+    passwd_salt = encode_data_salt_once(
+        password, username, crnd,
+        gs_response['dsk'],
+        gs_response['ssv'],
+        gs_response['dsv']
+    )
+    
+    # 4. Handle slider CAPTCHA
+    slider_data = await get_slider()
+    distance = get_slider_distance(slider_data['bg'], slider_data['slider'])
+    track = generate_human_like_track(distance)
+    verify_data = construct_verify_request(track, distance)
+    
+    # 5. Send login request
+    login_data = {
+        'uname': encrypted_username,
+        'passwd': encrypted_password,
+        'passwdSalt': passwd_salt,
+        **verify_data
+    }
+    
+    return await send_login_request(login_data)
+```
+
+## 4. Security Recommendations
+
+### 4.1 Frontend Encryption
+
+1. **Avoid Fixed Public Keys**:
+   - Regularly rotate RSA key pairs
+   - Use dynamically generated keys
+   - Consider alternative asymmetric encryption schemes
+
+2. **Increase Verification Complexity**:
+   - Add timestamp verification
+   - Use dynamic salt values
+   - Implement request signature mechanism
+
+3. **Obfuscation Protection**:
+   - Use JavaScript obfuscation tools
+   - Implement self-modifying code
+   - Add anti-debugging mechanisms
+
+### 4.2 CAPTCHA Optimization
+
+1. **Trajectory Verification**:
+   - Increase trajectory point verification
+   - Add acceleration detection
+   - Implement trajectory feature analysis
+
+2. **Image Processing**:
+   - Add image interference
+   - Use dynamic backgrounds
+   - Implement multi-image verification
+
+3. **Behavior Analysis**:
+   - Record user behavior characteristics
+   - Implement risk scoring
+   - Add secondary verification
+
+## 5. Summary
+
+Frontend reverse engineering is a complex and fascinating technical field that requires deep understanding of frontend frameworks, encryption algorithms, and CAPTCHA mechanisms. Through this case study, we have demonstrated:
+
+1. **Methods for reverse engineering Webpack/Vite bundled code**
+2. **Implementation and security analysis of RSA encryption algorithm**
+3. **Automated solutions for slider CAPTCHA**
+4. **Implementation of complete login process**
+
+In practical applications, we need to find a balance between security and user experience, protecting system security while ensuring good user experience. At the same time, we must also be mindful of the legal and ethical boundaries of reverse engineering to ensure appropriate use of technology.
+
+---
+
+*Note: This article is for technical research and learning purposes only. Please do not use it for illegal purposes. In actual projects, it is recommended to adopt more secure encryption schemes and verification mechanisms.*
