@@ -21,6 +21,12 @@ module.exports = {
     project: true,
     tsconfigRootDir: __dirname,
     sourceType: 'module',
+    ecmaVersion: 2022,
+  },
+  settings: {
+    next: {
+      rootDir: __dirname,
+    },
   },
   rules: {
     'prettier/prettier': [
