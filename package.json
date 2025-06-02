@@ -40,6 +40,7 @@
     "next-themes": "^0.3.0",
     "pliny": "^0.4.1",
     "postcss": "^8.4.33",
+    "prop-types": "^15.8.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-h5-audio-player": "^3.9.1",
@@ -95,7 +96,7 @@
     ]
   },
   "engines": {
-    "node": "20.11.1"
+    "node": "20"
   },
   "volta": {
     "node": "20.11.1"
