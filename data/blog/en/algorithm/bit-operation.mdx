@@ -1,56 +1,56 @@
 ---
-title: '位运算'
+title: 'Bit Operations'
 date: '2022-09-28'
 # lastmod: '1900-01-01'
 tags: ['algorithm', 'bit']
 authors: ['MASON']
 language: en
 draft: false
-summary: '大学期间学过的位运算基本都忘光了, 如果你也一样, 本文将带你回到过去~'
+summary: 'Most of the bit operations learned during university have been forgotten. If you are in the same boat, this article will take you back in time~'
 images: []
 layout: PostLayout
 ---
 
-### 基础 - 原码、反码、补码
+### Basics - True Form, Ones' Complement, Two's Complement
 
-众所周知, 计算机程序里最基本就是二进制了, 关于二进制不得不了解的三种码:
+As we all know, the most fundamental element in computer programs is binary. Here are three types of codes you must understand about binary:
 
-- **原码**, 首位符号位, 1 表负数, 0 表正数; **正数的反码和补码与原码一致**
-- **反码**, 负数反码, 符号位为 1, 其他 0->1, 1->0
-- **补码**, 负数补码, 其反码 + 1
+- **True Form**: The first bit is the sign bit, where 1 represents negative and 0 represents positive; **The ones' complement and two's complement of positive numbers are the same as their true form**
+- **Ones' Complement**: For negative numbers, the sign bit is 1, and all other bits are inverted (0->1, 1->0)
+- **Two's Complement**: For negative numbers, it's their ones' complement + 1
 
-**补码的原理是*取模同余*,** 推荐阅读 [计算机组成原理 - 原码,反码,补码](https://www.cnblogs.com/banmei-brandy/p/12299655.html). **整数在计算机中是以补码存在的**, 因为这样方便负数的计算
+**The principle of two's complement is *modular congruence***. Recommended reading: [Computer Organization - True Form, Ones' Complement, Two's Complement](https://www.cnblogs.com/banmei-brandy/p/12299655.html). **Integers exist in computers as two's complement** because it makes negative number calculations easier.
 
-### 位操作
+### Bit Operations
 
-- `&`, 有 0 为 0
-- `|`, 有 1 为 1
-- `~`, 按位取反. 它的十进制数学计算是 `加 1 取反`
-- `^`, 相同为 0, 不同为 1
-- `x >> n`, 低位丢弃, 高位补 符号位, 它的十进制数学计算是 `x / 2^n`
-- `x << n`, 高位丢弃, 低位补 0. 它的十进制数学计算是 `x * 2^n`
+- `&`, AND: results in 0 if any bit is 0
+- `|`, OR: results in 1 if any bit is 1
+- `~`, NOT: inverts all bits. Its decimal mathematical calculation is `add 1 and invert`
+- `^`, XOR: results in 0 if bits are the same, 1 if different
+- `x >> n`, right shift: discards low bits, fills high bits with sign bit. Its decimal mathematical calculation is `x / 2^n`
+- `x << n`, left shift: discards high bits, fills low bits with 0. Its decimal mathematical calculation is `x * 2^n`
 
-### 常用技巧
+### Common Techniques
 
-下面的 `x` 代表一个数字
+In the following, `x` represents a number
 
-- 判断奇偶: `x & 1 ?  奇数 : 偶数`
-- 向 0 取整[^1]: `x | 0`
-- indexOf 结果判断: `!~x`, 只有 `x` 为 `-1`, `~x` 才等于 0, 可以这么看 `!(不)~(存)x(在)`
-- 布尔转0/1: `~~x`, true -> 1, false -> 0
-- 中位数: `x >> 1`
-- 判断是否异号: `(x ^ y) < 0` 则异号. 相比用乘积来判断的优势是不会有整型溢出.  
-  注意位运算的优先级低于算术运算, 所以结合的时候记得加个括号.
+- Check if odd/even: `x & 1 ? odd : even`
+- Round towards zero[^1]: `x | 0`
+- Check indexOf result: `!~x`, only when `x` is `-1`, `~x` equals 0, you can think of it as `!(not)~(exists)x`
+- Convert boolean to 0/1: `~~x`, true -> 1, false -> 0
+- Middle value: `x >> 1`
+- Check if numbers have opposite signs: `(x ^ y) < 0` means opposite signs. The advantage over using multiplication is no integer overflow.
+  Note that bit operations have lower precedence than arithmetic operations, so remember to add parentheses when combining them.
 
-### 进阶技巧
+### Advanced Techniques
 
-- `x & x - 1`, 消除 x 二进制的最后一个 1 后的值.
-  - lc.191 汉明重量;lc.461 汉明距离；lc.231 2的幂;;都可以利用该方法快速解决
-- `x & -x`, 取 x 的最后一个 1 代表的值.
-  - 在 React 源码中, `getHighestPriorityLane` 就是用来获取最高优先级的(React定义1越靠右优先级越高).
-- `x ^ x === 0; x ^ 0 === x`, 且异或操作满足交换律、结合律.
+- `x & x - 1`, eliminates the last 1 in x's binary representation.
+  - Can be used to solve lc.191 Hamming Weight, lc.461 Hamming Distance, lc.231 Power of Two
+- `x & -x`, gets the value represented by the last 1 in x.
+  - In React source code, `getHighestPriorityLane` uses this to get the highest priority (React defines 1 as higher priority the more right it is).
+- `x ^ x === 0; x ^ 0 === x`, and XOR operation satisfies commutative and associative laws.
 
-来看一道经典题: _一组数, 只有 2 个数出现了一次，其他都是偶数次，找出这 2 个数._
+Let's look at a classic problem: _In a set of numbers, only 2 numbers appear once, while others appear an even number of times. Find these 2 numbers._
 
 ```js
 // test: [1,2,3,4,5,6,5,4,3,2]
@@ -59,37 +59,38 @@ function findOnlyOne(arr) {
   for (const item of arr) {
     val ^= item
   }
-  // 此刻 val 为两个只出现一次数的异或结果
-  // 根据异或相同为0,不同为1的情况, 两个不同的数异或结果一定至少有一个1, 可以找到最右边的 1
+  // At this point, val is the XOR result of the two numbers that appear only once
+  // Based on XOR properties (same bits = 0, different bits = 1), two different numbers XORed will have at least one 1
+  // We can find the rightmost 1
   const rightOne = val & -val
 
   let a = 0
   for (const item of arr) {
-    // rightOne 可以把原数据分为2波, 从而剥离出第一个不同的数
+    // rightOne can divide the original data into two groups, thus separating the first different number
     if ((rightOne & item) === 0) {
       a ^= item
     }
   }
-  let b = a ^ val // 利用异或的性质 a ^ b = c, 则 a ^ c = b
+  let b = a ^ val // Using XOR property: if a ^ b = c, then a ^ c = b
   return [a, b]
 }
 ```
 
-在一些源码中, 常常利用二进制来进行一些常量定义, 使用位运算去进行处理:
+In some source code, binary is often used to define constants, and bit operations are used for processing:
 
 ```js
 const A = 1 << 0; // 0b00000001
 const B = 1 << 1; // 0b00000010
 const C = 1 << 2; // 0b00000100
 
-const ABC = A | B | C; // 0b00000111 增加属性
-const AB = ABC & ~C;   // 0b00000011 删除属性
-(AB & B) === B         // true, 意味着 AB 包含 B
-(AB & C) === 0         // true，意味着 AB 不包含 C
+const ABC = A | B | C; // 0b00000111 add properties
+const AB = ABC & ~C;   // 0b00000011 remove properties
+(AB & B) === B         // true, means AB contains B
+(AB & C) === 0         // true, means AB doesn't contain C
 ```
 
-### 推荐阅读
+### Recommended Reading
 
 - [Bit Twiddling Hacks](https://graphics.stanford.edu/~seander/bithacks.html)
 
-[^1]: 向 0 取整, 就是整数向下取整, 负数向上取整, 从数轴上来看, 就是 0 的两边朝向 0 取整.
+[^1]: Rounding towards zero means rounding down for positive numbers and rounding up for negative numbers. From a number line perspective, it means rounding towards zero from both sides.

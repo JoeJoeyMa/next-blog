@@ -1,47 +1,47 @@
 ---
-title: '算法基本功'
+title: 'Algorithm Fundamentals'
 date: '2022-09-30'
 # lastmod: '1900-01-01'
 tags: ['algorithm']
 authors: ['MASON']
 language: en
 draft: false
-summary: '学习了一段时间数据结构和算法后总结的一点小知识, 希望能帮到你.'
+summary: 'Some knowledge points I summarized after learning data structures and algorithms for a while, hope it helps.'
 images: []
 layout: PostLayout
 ---
 
-本文不是实际意义上的算法基础, 而是我个人学习了一段时间算法后总结出来的一些我认为对于**初学者**来说还算是比较重要的小点.
+This article is not about algorithm basics in the traditional sense, but rather some points I've summarized after learning algorithms for a while that I think are quite important for **beginners**.
 
-## 区间
+## Intervals
 
-区间的概念在实际生活中其实非常常见:
+The concept of intervals is actually very common in real life:
 
-- 从 7 楼到 18 楼要爬多少层?
-- 1 月 10 号到 1 月 30 号共有多少天?
-- 1 月 10 号到 1 月 30 号之间有多少天?
+- How many floors do you need to climb from the 7th to the 18th floor?
+- How many days are there from January 10th to January 30th?
+- How many days are there between January 10th and January 30th?
 
-如果有区间的概念, 就可以很容易解决:
+With the concept of intervals, these can be easily solved:
 
-- `(7, 18]`: 7 到 18 楼, 那么是不包含 7 楼且包含 18 楼, 则需要爬 18 - 7 = 11.
-- `[10, 30]`: 包含 10 号和 30 号, 则 30 - 10 + 1 = 21 天
-- `(10, 30)`: 不包含 10 号和 30 号, 则 30 - 10 - 1 = 19 天
+- `(7, 18]`: From 7th to 18th floor, excluding 7th but including 18th, then you need to climb 18 - 7 = 11 floors.
+- `[10, 30]`: Including both 10th and 30th, then 30 - 10 + 1 = 21 days
+- `(10, 30)`: Excluding both 10th and 30th, then 30 - 10 - 1 = 19 days
 
-善于总结的人已经注意到了: **闭区间用 `[]`, 开区间用 `()`**, 对应的计算公式是:
+Those who are good at summarizing have noticed: **closed intervals use `[]`, open intervals use `()`**, and the corresponding calculation formulas are:
 
 - `[i, j]`: _j - i + 1_
 - `(i, j)`: _j - i - 1_
 - `(i, j]`: _j - i_
 
-可千万不要小瞧这个知识点, 如果对区间的概念不熟悉, 在做二分法的时候简直要命🥲
+Don't underestimate this knowledge point - if you're not familiar with the concept of intervals, binary search can be a nightmare🥲
 
-同意的朋友请在文章底部给我点个👍.
+If you agree, please give me a 👍 at the bottom of the article.
 
-## 遍历
+## Traversal
 
-来看看区间在遍历中的作用, 先说结果:
+Let's look at the role of intervals in traversal. Here's the result:
 
-**对于循环不定式, 如果是闭区间则包含, 如果是开区间则不包含.**
+**For loop invariants, if it's a closed interval then include, if it's an open interval then exclude.**
 
 ```js
 // [2, 28]
@@ -50,11 +50,11 @@ for (let i = 2; i <= 28; ++i) {}
 for (let i = 2; i < 28; ++i) {}
 ```
 
-一维数组的遍历没什么好多说的了, 主要看一下二位数组的遍历, 在动态规划中, 遍历的方式方向都是有一定技巧的.
+There's not much to say about one-dimensional array traversal. Let's mainly look at two-dimensional array traversal. In dynamic programming, the direction and method of traversal have certain techniques.
 
-### 螺旋遍历
+### Spiral Traversal
 
-螺旋遍历，和 `BFS` 有一点点像，需要 `while` 和 `for` 配合，同时需要四个边界来进行收缩。
+Spiral traversal is a bit similar to `BFS`, requiring `while` and `for` loops to work together, along with four boundaries for contraction.
 
 ```js
 let count = 0
@@ -63,25 +63,25 @@ let top = 0,
   bottom = m - 1,
   right = n - 1
 while (count < 25) {
-  // 遍历顶部的行 区间 [left, right]
+  // Traverse top row interval [left, right]
   for (let i = left; i <= right; ++i) {
     console.log(Arr[top][i])
     count++
   }
   top++
-  // 遍历右边的列 [top, bottom]
+  // Traverse right column [top, bottom]
   for (let i = top; i <= bottom; ++i) {
     console.log(Arr[i][right])
     count++
   }
   right--
-  // 倒序遍历底部的行 [left, right]
+  // Traverse bottom row in reverse [left, right]
   for (let i = right; i >= left; --i) {
     console.log(Arr[bottom][i])
     count++
   }
   bottom--
-  // 倒序遍历左侧的列 [top, bottom]
+  // Traverse left column in reverse [top, bottom]
   for (let i = bottom; i >= top; --i) {
     console.log(Arr[i][left])
     count++
@@ -90,51 +90,51 @@ while (count < 25) {
 }
 ```
 
-### 斜向遍历
+### Diagonal Traversal
 
-![](https://cdn.jsdelivr.net/gh/yokiizx/picgo@main/img/202303291708525.png) 如图，按照这样的顺序怎么遍历呢？
+![](https://cdn.jsdelivr.net/gh/yokiizx/picgo@main/img/202303291708525.png) As shown in the figure, how do we traverse in this order?
 
-先了解一下
+First, let's understand:
 
-- 主对角线：左上角到右下角，坐标 `i === j`; 可得性质 `i - j` 固定值
-- 副对角线：左下角到右上角，坐标 `i + j === len - 1`; 可得性质 `i + j` 固定值
+- Main diagonal: from top-left to bottom-right, coordinates `i === j`; property: `i - j` is constant
+- Secondary diagonal: from bottom-left to top-right, coordinates `i + j === len - 1`; property: `i + j` is constant
 
-**而这个固定值, 在斜向遍历中恰好与斜线 `l` 的索引相等. (纯用数学归纳法的个人总结😂)**
+**And this constant value happens to be equal to the index of diagonal line `l` in diagonal traversal. (My personal summary using mathematical induction😂)**
 
-```js:主对角线上半部分
-// 数组大小为 5 * 5, 斜线对应索引为 [1, 4], 所以外层for遍历斜线
+```js:Upper part of main diagonal
+// Array size is 5 * 5, diagonal indices are [1, 4], so outer for loop traverses diagonals
 for (let l = 1; l < len; ++l) {
-  for (let i = 0; i < len - l; ++i) { // i 的区间为 [0, len - l]
-    const j = l + i // 主对角线 i - j 固定
+  for (let i = 0; i < len - l; ++i) { // i interval is [0, len - l]
+    const j = l + i // Main diagonal i - j is constant
     console.log(arr[i][j])
   }
 }
 ```
 
-```js:主对角线下半部分
+```js:Lower part of main diagonal
 for(let l = 1; l < len; ++l) {
-  for(let j = 0; j < len - l; ++j) { // 仅仅是 i 和 j 调换一下位置即可
+  for(let j = 0; j < len - l; ++j) { // Just swap i and j positions
     const i = l + j
     console.log(arr[i][j])
   }
 }
 ```
 
-副对角线留给你🐶 (当然我是不推荐死记硬背的, 还是得掌握基本原理, 多观察多思考.)
+The secondary diagonal is left for you🐶 (Of course, I don't recommend memorizing by rote, you should master the basic principles, observe and think more.)
 
-## 递归
+## Recursion
 
 <img src="/static/images/recurse.svg" className="w-48" />
 
-递归就是自己调自己, 往往用来处理复杂的问题比较直观有效.常规的递归教学建议直接谷歌, 这里记录下我认为对递归理解需要注意的点:
+Recursion is calling yourself, often used to handle complex problems in a more intuitive and effective way. For conventional recursion teaching, I suggest searching Google directly. Here I'll record some points I think are important for understanding recursion:
 
-- 递归必须有结束条件, 防止死循环
-- 注意递归的过程中的 `return`, 对出参有数
-- 充分利用好递归函数的入参保存传递信息
+- Recursion must have termination conditions to prevent infinite loops
+- Pay attention to `return` during recursion, be mindful of the output parameters
+- Make good use of recursion function input parameters to save and pass information
 
-### 递归序
+### Recursive Order
 
-很多讲递归的都不会讲递归序, 但其实这对于递归的理解非常重要.
+Many recursion tutorials don't cover recursive order, but it's actually very important for understanding recursion.
 
 ```js
 /**
@@ -144,31 +144,31 @@ for(let l = 1; l < len; ++l) {
  *     / \ / \
  *    4  5 6  7
  *
- * 下方 go 函数就是对这棵二叉树的递归序遍历
- * 每个节点都会结果 3 次，分别在1，2，3位置；实际遍历顺序：
+ * The go function below performs recursive order traversal of this binary tree
+ * Each node will be processed 3 times, at positions 1, 2, 3; actual traversal order:
  *
- * 1(1)，2(1)，4(1)，4(2)，4(3)，
- * 2(2)，5(1)，5(2)，5(3)，2(3)，
- * 1(2)，3(1)，6(1)，6(2)，6(3)，
- * 3(2)，7(1)，7(2)，7(3)，3(3)，1(3)
+ * 1(1), 2(1), 4(1), 4(2), 4(3),
+ * 2(2), 5(1), 5(2), 5(3), 2(3),
+ * 1(2), 3(1), 6(1), 6(2), 6(3),
+ * 3(2), 7(1), 7(2), 7(3), 3(3), 1(3)
  *
- * 前序（根左右（1））结果：1，2，4，5，3，6，7
- * 前序（左根右（2））结果：4，2，5，1，6，3，7
- * 前序（左右根（3））结果：4，5，2，6，7，3，1
+ * Pre-order (root-left-right(1)) result: 1, 2, 4, 5, 3, 6, 7
+ * In-order (left-root-right(2)) result: 4, 2, 5, 1, 6, 3, 7
+ * Post-order (left-right-root(3)) result: 4, 5, 2, 6, 7, 3, 1
  */
 funcion go(head) {
   if(head == null) return;
-  // 1 前序
+  // 1 Pre-order
   go(head.left);
-  // 2 中序
+  // 2 In-order
   go(head.right);
-  // 3 后序
+  // 3 Post-order
 }
 ```
 
-我们平时用的更多的递归, 可能只有 **前序 + 后序**, 而后序的特点就很重要了, 它**能拿到之前调用栈归阶段时返回的信息**.
+We often use more recursion with just **pre-order + post-order**, and the characteristics of post-order are very important - it **can access information returned during the previous call stack's return phase**.
 
-来看一下 lc.206 反转链表easy 用递归怎么做:
+Let's look at how to solve lc.206 Reverse Linked List (easy) using recursion:
 
 ```js
 /**
@@ -184,10 +184,10 @@ var reverseList = function (head) {
 }
 ```
 
-短短 5 行代码, 初学者真的还挺难理解的😂.**为什么直接就 `return newHead` 就是最后的结果?**
+Just 5 lines of code, but it's really hard for beginners to understand😂. **Why does `return newHead` directly give the final result?**
 
-这个递归里的 `return newHead` 是在递归函数的下面, 也就是**后序位置**, 每次 return 的都是最后一轮递归调用栈返回的那个节点指针, 也就是最后一个节点的指针.
-在 tree 递归中, 比如要寻找某个节点, 找到就返回, 那么对于 for 循环中递归递归的调用需要处理, 核心伪代码如下:
+The `return newHead` in this recursion is below the recursive function, which is in the **post-order position**. Each return is the node pointer returned by the last round of recursive call stack, which is the pointer to the last node.
+In tree recursion, for example, when looking for a certain node, if found then return. For recursive calls in for loops, you need to handle them. The core pseudo-code is:
 
 ```js
 const find = () => {
@@ -197,4 +197,4 @@ const find = () => {
 }
 ```
 
-最后说一个对于递归很重要的点, 千万不要用你的脑子去挑战递归的深度, 不要陷入进去, 脑子会爆栈的💥~
+Finally, one very important point about recursion: never try to challenge recursion depth with your brain, don't get caught up in it, your brain will stack overflow💥~

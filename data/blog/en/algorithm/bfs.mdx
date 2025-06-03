@@ -6,22 +6,21 @@ tags: ['algorithm']
 authors: ['MASON']
 language: en
 draft: false
-summary: '广度优先搜索'
+summary: 'Breadth-First Search'
 images: []
 layout: PostLayout
 ---
 
+## Brute Force Recursion - BFS
 
-## 暴力递归-bfs
+When learning about binary trees, level-order traversal is implemented using BFS.
 
-在学习二叉树的时候，层序遍历就是用 BFS 实现的。
+From binary trees to multi-way trees to graphs, we start from one point and spread out in all directions. Generally, BFS algorithms use a "queue" data structure, where we add all surrounding nodes of a node to the queue.
 
-从二叉树拓展到多叉树到图，从一个点开始，向四周开始扩散。一般来说，写 BFS 算法都是用「队列」这种数据结构，每次将一个节点周围的所有节点加入队列。
-
-BFS 一大常见用途，就是**找 start 到 target 的最近距离**，要能把实际问题往这方面转。
+A common use of BFS is to **find the shortest distance from start to target**, and we need to be able to transform practical problems into this form.
 
 ```js
-// 二叉树中 start 就是 root
+// In a binary tree, start is the root
 function bfs(start, target) {
     const queue = [start]
     const visited = new Set()
@@ -30,11 +29,11 @@ function bfs(start, target) {
     let step = 0
     while (queue.length > 0) {
         const size = queue.length
-        /** 将当前队列中的所有节点向四周扩散 */
+        /** Spread all nodes in the current queue to their surroundings */
         for (let i = 0; i < size; ++i) {
             const el = queue.shift()
-            if (el === target) return step // '需要的信息'
-            const adjs = el.adj() // 泛指获取到 el 的所有相邻元素
+            if (el === target) return step // 'required information'
+            const adjs = el.adj() // generally refers to getting all adjacent elements of el
             for (let j = 0; j < adjs.length; ++j) {
                 if (!visited.has(adjs[j])) {
                     queue.push(adjs[j])
@@ -47,13 +46,13 @@ function bfs(start, target) {
 }
 ```
 
-## 练习
+## Practice
 
-### lc.111 二叉树的最小深度 easy
+### lc.111 Minimum Depth of Binary Tree easy
 
 ```js
 /**
- * 忍不住上来先来了个回溯 dfs，但不是今天的主角哈😂 ps: 此处用了回溯的思想，也可以用转为子问题的思想
+ * Can't help but start with a backtracking dfs, but that's not today's main topic 😂 ps: used backtracking here, but could also use the approach of converting to subproblems
  * @param {TreeNode} root
  * @return {number}
  */
@@ -79,13 +78,13 @@ var minDepth = function (root) {
 ```
 
 ```js
-/** BFS 版本 */
+/** BFS version */
 /**
  * @param {TreeNode} root
  * @return {number}
  */
 var minDepth = function (root) {
-    // 这里求的就是 root 到 最近叶子结点（target）的距离，明确了这个，剩下的交给手吧~
+    // Here we're finding the distance from root to the nearest leaf node (target), once we understand this, the rest is straightforward~
     if (root === null) return 0
     const queue = [root]
     let deep = 0
@@ -103,13 +102,13 @@ var minDepth = function (root) {
 }
 ```
 
-不得不说，easy 面前还是有点底气的，😄。
+Have to say, we're quite confident with easy problems 😄.
 
-### lc.752 打开转盘锁
+### lc.752 Open the Lock
 
-这道题是中等题，but，真的有点难度，需要好好分析。
+This is a medium problem, but it's quite challenging and needs careful analysis.
 
-首先毫无疑问，是一个穷举题目，其次，题目一个重点是：**每次旋转都只能旋转一个拨轮的一位数字**，这样我们就能抽象出每个节点的相邻节点了， '0000', '1000','9000','0100','0900'......如是题目就转变成了从 '0000' 到 target 的最短路径问题了。
+First, it's undoubtedly an exhaustive search problem. Second, a key point in the problem is: **each rotation can only turn one digit of one wheel**, which allows us to abstract the adjacent nodes. For example, '0000' has neighbors like '1000', '9000', '0100', '0900'... Thus, the problem transforms into finding the shortest path from '0000' to target.
 
 ```js
 /**
@@ -128,7 +127,7 @@ var openLock = function (deadends, target) {
             const el = queue.shift()
             if (deadends.includes(el)) continue
             if (el === target) return step
-            // 把相邻元素加入 queue
+            // Add adjacent elements to queue
             for (let j = 0; j < 4; j++) {
                 const up = plusOne(el, j)
                 const down = minusOne(el, j)
@@ -140,7 +139,7 @@ var openLock = function (deadends, target) {
     }
     return -1
 }
-// 首先定义 每个转盘 +1，-1 操作
+// First define the +1, -1 operations for each wheel
 function plusOne(str, i) {
     const arr = str.split('')
     if (arr[i] == '9') {
@@ -161,17 +160,17 @@ function minusOne(str, i) {
 }
 ```
 
-> 提一下 「双向 BFS 优化」：传统的 BFS 框架就是从起点开始向四周扩散，遇到终点时停止；而双向 BFS 则是从起点和终点同时开始扩散，当两边有交集的时候停止。[labuladong](https://labuladong.online/algo/essential-technique/bfs-framework-2/#%E5%9B%9B%E3%80%81%E5%8F%8C%E5%90%91-bfs-%E4%BC%98%E5%8C%96)
+> Let's mention "Bidirectional BFS Optimization": Traditional BFS framework spreads from the starting point until it reaches the target, while bidirectional BFS spreads from both the start and target points simultaneously, stopping when there's an intersection between the two sides. [labuladong](https://labuladong.online/algo/essential-technique/bfs-framework-2/#%E5%9B%9B%E3%80%81%E5%8F%8C%E5%90%91-bfs-%E4%BC%98%E5%8C%96)
 
-### lc.773 滑动谜题 hard
+### lc.773 Sliding Puzzle hard
 
-又是一个小时候玩过的经典小游戏。初学者是真的想不到怎么做，知道用什么方法的也在把实际问题转为 BFS 问题上犯了难。
+Another classic game from childhood. Beginners really can't figure out how to solve it, and even those who know the method struggle with transforming the practical problem into a BFS problem.
 
-来一点点分析，1. 每次都是空位置 0 做选择，移动相邻的上下左右的元素到 0 位置，2. target 就是 [[1,2,3],[4,5]]，这可咋整呢？借鉴上一题的思路，如果转为字符串，那不就好做多了？！难就难在如何把二维数组压缩到一维字符串，同时记录下每个数字的邻居索引呢。
+Let's analyze it step by step: 1. Each time, the empty position 0 makes a choice, moving adjacent elements up, down, left, or right to the 0 position. 2. The target is [[1,2,3],[4,5]], how do we handle this? Following the previous problem's approach, if we convert it to a string, wouldn't it be much easier? The difficulty lies in how to compress the 2D array into a 1D string while recording the neighbor indices of each number.
 
-一个技巧是：**对于一个 `m x n` 的二维数组，如果二维数组中的某个元素 e 在一维数组中的索引为 `i`，那么 e 的左右相邻元素在一维数组中的索引就是 `i - 1` 和 `i + 1`，而 e 的上下相邻元素在一维数组中的索引就是 `i - n` 和 `i + n`，其中 `n` 为二维数组的列数。**
+A technique is: **For an `m x n` 2D array, if an element e in the 2D array has index `i` in the 1D array, then e's left and right adjacent elements in the 1D array have indices `i - 1` and `i + 1`, while e's up and down adjacent elements have indices `i - n` and `i + n`, where `n` is the number of columns in the 2D array.**
 
-当然了，本题 2\*3 可以直接写出来 😁。
+Of course, for this 2*3 problem, we can write it directly 😁.
 
 ```js
 /**
@@ -186,7 +185,7 @@ const neighbors = [
     [1, 3, 5],
     [2, 4]
 ]
-// 有点邻接表的意思奥~
+// Kind of like an adjacency list~
 var slidingPuzzle = function (board) {
     let str = ''
     for (let i = 0; i < board.length; ++i) {
@@ -196,7 +195,7 @@ var slidingPuzzle = function (board) {
     }
     const target = '123450'
     const queue = [str]
-    const visited = [str] // 用 set 也行~
+    const visited = [str] // could use Set too~
     let step = 0
     while (queue.length) {
         const size = queue.length
@@ -204,13 +203,13 @@ var slidingPuzzle = function (board) {
             const el = queue.shift()
             if (el === target) return step
 
-            /** 找到 0 的索引 和它周围元素交换 */
+            /** Find the index of 0 and swap with its surrounding elements */
             const idx = el.indexOf('0')
             for (const neighborIdx of neighbors[idx]) {
-                // 交换得转为数组
+                // Need to convert to array for swapping
                 const newEl = swap(el, idx, neighborIdx)
                 if (visited.indexOf(newEl) === -1) {
-                    // 不走回头路
+                    // Don't go back
                     queue.push(newEl)
                     visited.push(newEl)
                 }
@@ -229,4 +228,4 @@ function swap(str, i, j) {
 }
 ```
 
-{/* lc.365 水壶问题 */}
+{/* lc.365 Water and Jug Problem */}
