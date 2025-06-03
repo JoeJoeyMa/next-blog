@@ -104,5 +104,5 @@
   "resolutions": {
     "ajv": "8.17.1"
   },
-  "packageManager": "yarn@4.0.2"
+  "packageManager": "yarn@4.9.1"
 }
