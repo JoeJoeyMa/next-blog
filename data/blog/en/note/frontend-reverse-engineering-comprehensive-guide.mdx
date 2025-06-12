@@ -1,15 +1,198 @@
 ---
-title: "Frontend Reverse Engineering: A Comprehensive Analysis from Webpack/Vite Bundling to Slider CAPTCHA and Public-Private Key Encryption"
+title: "Frontend Reverse Engineering: A Comprehensive Guide from Webpack/Vite Bundling to Slider Verification and Public-Private Key Encryption"
 date: "2024-12-18"
 authors: ['MASON']
 language: en
-summary: "An in-depth exploration of frontend reverse engineering practices, including Webpack/Vite bundled code analysis, slider CAPTCHA automation, RSA encryption implementation, and how to apply these technologies in real projects."
-tags: ["Frontend", "Reverse Engineering", "Webpack", "Vite", "Encryption", "CAPTCHA", "JavaScript", "Node.js", "Python", "Security", "Automation"]
+summary: "An in-depth exploration of frontend reverse engineering practices, including Webpack/Vite code analysis, slider verification automation, RSA encryption implementation, and how to apply these technologies to real projects."
+tags: ["Frontend", "Reverse Engineering", "Webpack", "Vite", "Encryption", "Verification", "JavaScript", "Node.js", "Python", "Security", "Automation"]
 images: ['']
 layout: PostLayout
 ---
 
-# Frontend Reverse Engineering: A Comprehensive Analysis from Webpack/Vite Bundling to Slider CAPTCHA and Public-Private Key Encryption
+# Frontend Reverse Engineering: A Comprehensive Guide from Webpack/Vite Bundling to Slider Verification and Public-Private Key Encryption
+
+## Detailed Comparison of Webpack and Vite
+
+Webpack and Vite are two mainstream build tools in modern frontend development, with significant differences in their bundling principles, architectural design, performance, and applicable scenarios. The following provides a detailed analysis of their underlying bundling principles, architecture, technical differences, Vite's different handling in development and production environments, and their historical development backgrounds.
+
+### I. Underlying Bundling Principles and Architecture of Webpack and Vite
+
+#### 1. Webpack's Bundling Principles and Architecture
+
+**Bundling Principles**:
+Webpack is a static module bundler whose core concept is to treat various resources in a project (such as JavaScript, CSS, images, etc.) as modules, analyze their dependencies, and bundle them into one or more static resource files (typically bundle.js). Webpack's bundling process can be summarized in the following steps:
+
+1. Entry File Identification: Starting from the configured entry file, Webpack analyzes the project's entry points.
+2. Dependency Graph Construction: By parsing import and require statements in the code, it recursively identifies all module dependencies, forming a dependency graph.
+3. Module Processing: Using Loaders to convert non-JavaScript files (such as CSS, images, TypeScript) into JavaScript modules, and extending functionality through Plugins (such as code compression, CSS extraction).
+4. Code Transformation and Compilation: Converting modules (e.g., using Babel to transform ES6+ code), optimizing (such as Tree Shaking, code splitting).
+5. Bundle Output: Merging processed modules into one or more bundle files, outputting to the specified directory.
+
+**Architectural Features**:
+- Full Bundling: Webpack bundles the entire project in both development and production environments, generating complete bundle files. In development, it provides Hot Module Replacement (HMR) through Webpack Dev Server, but still needs to recompile affected module chains.
+- Modular Support: Supports multiple modular specifications including CommonJS, AMD, and ES Modules, with strong compatibility.
+- Loaders and Plugins: Webpack's core advantage lies in its powerful ecosystem. Loaders handle non-JavaScript files, while Plugins extend bundling functionality (such as code optimization, file injection).
+- Node.js Driven: Webpack runs on Node.js, implemented in JavaScript, with performance limited by JavaScript execution efficiency.
+
+**Technology Stack**:
+- Core: Node.js (JavaScript runtime)
+- Module Resolution: Through enhanced-resolve for module dependency resolution
+- Code Transformation: Relies on Loaders (such as babel-loader, css-loader) and Plugins (such as terser-webpack-plugin)
+- Development Server: Webpack Dev Server provides hot updates and static file serving
+
+**Disadvantages**:
+- Slow Startup: Large projects require analyzing the entire dependency graph and bundling, making development server startup time-consuming
+- HMR Delay: After code modifications, Webpack needs to recompile affected module chains, with HMR speed slowing down in large projects
+- Complex Configuration: Requires writing detailed webpack.config.js files, with a steep learning curve
+
+#### 2. Vite's Bundling Principles and Architecture
+
+**Bundling Principles**:
+Vite is a modern frontend build tool developed by Evan You (creator of Vue.js), designed to provide faster development experience and simpler configuration. Vite's core design philosophy is to leverage browser-native ES Modules (ESM) support, dividing modules into dependencies and source code, optimizing the build process for both development and production environments.
+
+**Development Environment**:
+- No Bundling Startup: Unlike Webpack, Vite doesn't bundle the entire project at startup, but directly starts a development server, leveraging browser-native ESM for on-demand module loading.
+- On-demand Compilation: When the browser requests a module, Vite compiles that module and its dependencies in real-time (e.g., converting Vue single-file components or TypeScript to JavaScript). This greatly reduces startup time.
+- Dependency Pre-bundling: Vite uses esbuild (a super-fast build tool based on Go) to pre-bundle third-party dependencies (such as libraries in node_modules), converting them to ESM format and caching them in node_modules/.vite, reducing the number of module requests from the browser.
+- Hot Module Replacement (HMR): Vite's HMR is based on ESM, only updating modified modules and their direct dependencies, with extremely fast update speeds.
+
+**Production Environment**:
+- Rollup Bundling: Vite uses Rollup for bundling in production. Rollup focuses on ESM, excels at Tree Shaking and code optimization, generating smaller bundle files.
+- On-demand Loading: Vite leverages ESM's dynamic imports (import()) and code splitting to optimize production environment loading performance.
+
+**Architectural Features**:
+- Dual Engine Design:
+  - Development Environment: Based on esbuild and browser-native ESM, providing fast cold start and HMR
+  - Production Environment: Based on Rollup, providing efficient Tree Shaking and code compression
+- Native ESM: Vite fully utilizes modern browser ESM support, delegating module loading to the browser, reducing build tool workload
+- Simple Configuration: Vite's configuration file vite.config.js is simple and intuitive, providing modern development environment configuration out of the box
+- Plugin System: Vite is compatible with Rollup's plugin API while supporting Vite-specific plugins, though the ecosystem is smaller than Webpack's
+
+**Technology Stack**:
+- Core: esbuild (Go language, pre-bundling dependencies), Rollup (production bundling)
+- Module Resolution: Leverages browser-native ESM, combined with esbuild's efficient parsing
+- Development Server: Based on Koa (Node.js framework), providing fast static file serving and HMR
+- File Transformation: Supports single-file components for Vue, React, Svelte, etc., with built-in CSS and TypeScript processing
+
+**Disadvantages**:
+- Immature Ecosystem: Compared to Webpack, Vite's plugin and Loader ecosystem is smaller, some complex scenarios may require manual configuration
+- Browser Compatibility: Relies on ESM, requiring target browsers to support native ES Modules (e.g., Chrome 61+, Firefox 60+), with additional configuration needed for older browsers (e.g., @vitejs/plugin-legacy)
+- CommonJS Limitations: Vite doesn't directly support CommonJS modules, requiring conversion to ESM through esbuild
+
+### II. Technical and Design Differences Between Webpack and Vite
+
+The following compares Webpack and Vite across multiple dimensions:
+
+| Dimension | Webpack | Vite |
+|-----------|---------|------|
+| Development Mode | Full bundling, requires analyzing dependency graph and generating bundle before starting dev server | No bundling, uses browser ESM, on-demand module compilation, near-instant startup |
+| Bundling Speed | Slow, needs to process entire project dependency graph, Node.js driven | Very fast in development (esbuild pre-bundling), Rollup optimization in production |
+| Hot Update (HMR) | Full update, needs to recompile affected module chains, speed slows with project size | Incremental update, only updates modified modules, fast and stable |
+| Plugin Ecosystem | Mature and rich, Loaders and Plugins support almost all scenarios | Based on Rollup plugins, smaller ecosystem but growing rapidly |
+| Configuration Complexity | Complex configuration, requires detailed webpack.config.js setup | Simple configuration, vite.config.js works out of the box, suitable for rapid development |
+| Modular Support | Supports multiple formats including CommonJS, AMD, ESM, strong compatibility | Focuses on ESM, needs to convert CommonJS, suitable for modern browsers |
+| Production Environment | Uses Webpack throughout for bundling, generates bundle, supports complex optimization | Uses Rollup for bundling, focuses on Tree Shaking and code splitting, generates smaller bundle |
+| Applicable Scenarios | Large, complex projects requiring high customization | Small to medium projects, rapid prototyping, modern frameworks |
+
+**Technical Differences**:
+- Underlying Language:
+  - Webpack uses JavaScript (Node.js), with performance limited by JavaScript execution efficiency
+  - Vite's dependency pre-bundling uses esbuild (Go language, 10-100x faster than JavaScript), production environment uses Rollup (JavaScript, but focused on ESM optimization)
+- Module Loading:
+  - Webpack generates bundle through bundling, browser loads entire bundle file
+  - Vite leverages browser-native ESM, dynamically loads modules, reducing bundling overhead
+- HMR Implementation:
+  - Webpack's HMR needs to recompile affected module chains, lower efficiency
+  - Vite's HMR is based on ESM, only updates modified modules, extremely efficient
+- Caching Mechanism:
+  - Webpack relies on filesystem caching (e.g., cache configuration), but still needs full bundling
+  - Vite uses HTTP caching (304 Not Modified negotiation cache, Cache-Control: max-age=31536000,immutable strong cache) to optimize dependency loading
+
+### III. Vite's Bundling Differences in Development and Production Environments
+
+Vite's bundling strategy differs completely between development and production environments, which is one of its core design advantages.
+
+#### 1. Development Environment
+- No Bundling: Vite doesn't perform full bundling, but starts a Koa-based development server, directly serving source code
+- On-demand Compilation: Leverages browser-native ESM, when browser requests a module (e.g., .vue, .tsx), Vite compiles that module and its dependencies in real-time
+- Dependency Pre-bundling: Third-party dependencies (e.g., React, Vue) are pre-bundled by esbuild into ESM format, cached in node_modules/.vite, avoiding repeated parsing
+- HMR: ESM-based HMR only updates modified modules, extremely fast, typically in milliseconds
+- Advantages: Fast startup, efficient HMR, smooth development experience, especially suitable for large projects
+
+#### 2. Production Environment
+- Rollup Bundling: Vite uses Rollup for bundling, generating optimized bundle files
+- Tree Shaking: Rollup's static analysis capability is better than Webpack's, more efficient at removing unused code
+- Code Splitting: Vite automatically supports dynamic imports (import()) and CSS code splitting, optimizing loading performance
+- Compression Optimization: Rollup works with terser or esbuild for code compression, generating smaller bundles
+- Advantages: Small file size, fast loading speed, suitable for production deployment
+
+**Difference Summary**:
+- Development Environment: No bundling, on-demand compilation, relies on esbuild and browser ESM, focuses on speed and development experience
+- Production Environment: Full bundling, relies on Rollup, focuses on code optimization and performance
+- Consistency: Vite ensures consistency between development and production through pre-bundled dependencies and unified plugin API (based on Rollup), but bundling process is completely different
+
+### IV. Historical Development of Webpack and Vite
+
+#### 1. Webpack's History
+- 2012: Webpack created by Tobias Koppers, initially to solve Browserify's limitations (e.g., lack of support for non-JS resources like CSS, images)
+- 2014: Webpack 1.0 released, introducing module bundling, Loaders and Plugin mechanisms, becoming an alternative to Grunt and Gulp. At that time, JavaScript ecosystem was primarily CommonJS, Webpack provided powerful modular support
+- 2016-2017: Webpack 2 introduced Tree Shaking and dynamic imports, supporting ES Modules, adapting to rapid development of frontend frameworks (e.g., React, Vue)
+- 2018: Webpack 4 optimized performance, introduced mode (development/production), default support for zero configuration
+- 2020: Webpack 5 released, improved persistent caching, Module Federation, and optimized long-standing performance issues
+- Current Status: Webpack has a mature ecosystem, widely used in large projects, but its complex configuration and high performance overhead drove the emergence of lighter tools
+
+#### 2. Vite's History
+- 2020: Vite launched by Evan You during Vue 3.0 development, initially to provide faster build tools for Vue projects. At that time, Webpack's startup and HMR speed became bottlenecks in large projects
+- 2021: Vite 2.0 released, supporting multiple frameworks (Vue, React, Svelte, etc.), introducing esbuild pre-bundling, establishing the "no bundling in development, Rollup in production" model. Vue 3's default scaffolding switched from vue-cli (Webpack-based) to create-vite
+- 2022-2023: Vite ecosystem developed rapidly, plugin count increased, supporting more frameworks and scenarios. At ViteConf 2023, Evan You announced Rolldown (Rust-based Rollup alternative) plan, aiming to further improve build performance
+- Current Status: Vite has become the preferred tool for modern frontend development, especially popular in Vue and React communities. Ecosystem is not as mature as Webpack's but growing rapidly
+
+**Historical Comparison**:
+- Webpack: Early start (2012), experienced frontend modularization evolution from CommonJS to ESM, mature but complex ecosystem
+- Vite: Late start (2020), designed for modern browsers and ESM, emphasizing speed and simplicity, representing the next generation of build tools
+
+### V. Detailed Analysis and Selection Recommendations
+
+#### 1. Performance Analysis
+- Startup Speed: Vite's no-bundling startup and esbuild pre-bundling make its development environment startup speed far exceed Webpack's (milliseconds vs seconds)
+- HMR Speed: Vite's incremental update mechanism makes its HMR speed almost unaffected by project size, while Webpack's full update slows down significantly in large projects
+- Production Bundling: Vite's Rollup bundling generates smaller bundles, with more efficient Tree Shaking; Webpack's bundling is more comprehensive but may result in larger bundle size
+
+#### 2. Ecosystem and Extensibility
+- Webpack: Has vast Loader and Plugin ecosystem, supporting almost all scenarios, but requires complex configuration and maintenance
+- Vite: Plugin ecosystem based on Rollup, smaller in number but sufficient for common needs, simple configuration, suitable for rapid development
+
+#### 3. Applicable Scenarios
+- Webpack:
+  - Suitable for large, complex projects requiring high customization (e.g., micro-frontends, Module Federation)
+  - Suitable for projects needing to support older browsers (through polyfills and Loaders)
+  - Suitable for legacy projects with existing Webpack configuration
+- Vite:
+  - Suitable for small to medium projects, rapid prototyping, or modern frameworks (e.g., Vue 3, React)
+  - Suitable for teams pursuing development experience and performance
+  - Not suitable for projects requiring complex custom build logic or supporting older browsers (unless using plugins)
+
+#### 4. Future Trends
+- Webpack: Still optimizing performance (e.g., caching, Module Federation), but limited by Node.js and full bundling mode, difficult to reach Vite's speed
+- Vite: With Rolldown development (Rust implementation of Rollup), Vite's performance and ecosystem will further improve, likely to replace Webpack in more scenarios
+
+### VI. Summary
+
+Webpack is a powerful, mature module bundler suitable for complex large projects, but its startup and HMR speed are slow, with complex configuration. Vite leverages browser-native ESM and esbuild to provide extremely fast development experience and simple configuration, optimizing output through Rollup in production, suitable for modern frontend development. The core difference between them lies in design philosophy: Webpack emphasizes comprehensiveness and compatibility, while Vite pursues speed and modernization.
+
+**Selection Recommendations**:
+- If your project requires high customization, supports complex scenarios, or needs to be compatible with older browsers, choose Webpack
+- If you pursue development efficiency, rapid iteration, or use modern frameworks (e.g., Vue 3, React), Vite is a better choice
+- For new projects, recommend trying Vite first, especially in small to medium projects; for legacy projects, gradual migration to Vite requires evaluating ecosystem compatibility
+
+**Historical Trends**:
+Webpack represents the previous generation of frontend build tools, solving modularization problems but performance gradually becoming a bottleneck; Vite represents the next generation of tools, leveraging modern browser features and efficient languages (e.g., Go, Rust) to drive a revolution in build speed. With increasing browser support for ESM and Vite's ecosystem maturing, Vite is expected to occupy a larger market share in the future.
+
+**References**:
+- Vite Official Documentation: https://vitejs.dev
+- Webpack Official Documentation: https://webpack.js.org
+- Rollup Official Documentation: https://rollupjs.org
+- esbuild Official Documentation: https://esbuild.github.io
 
 ## 1. Overview of Frontend Reverse Engineering
 
