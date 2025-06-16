@@ -1,40 +1,40 @@
 import { NextResponse, NextRequest } from 'next/server'
-
-// 定义支持的语言
-const locales = ['en', 'zh'] as const
-const fallbackLng = 'en'
+import { locales } from 'app/[locale]/i18n/settings'
+import { fallbackLng } from 'app/[locale]/i18n/locales'
 
 export function middleware(request: NextRequest) {
+  // Check if there is any supported locale in the pathname
   const pathname = request.nextUrl.pathname
-  
-  // 检查是否是爬虫请求
-  const userAgent = request.headers.get('user-agent') || ''
-  const isBot = /bot|crawler|spider|crawling/i.test(userAgent)
-  
-  // 如果是爬虫请求，直接返回默认语言版本的内容
-  if (isBot) {
-    if (pathname === '/') {
-      return NextResponse.rewrite(new URL(`/${fallbackLng}`, request.url))
-    }
-    return NextResponse.next()
+
+  // Check if the default locale is in the pathname
+  if (pathname.startsWith(`/${fallbackLng}/`) || pathname === `/${fallbackLng}`) {
+    // e.g. incoming request is /en/about
+    // The new URL is now /about
+    return NextResponse.redirect(
+      new URL(
+        pathname.replace(`/${fallbackLng}`, pathname === `/${fallbackLng}` ? '/' : ''),
+        request.url
+      )
+    )
   }
 
-  // 检查是否已经包含语言前缀
   const pathnameIsMissingLocale = locales.every(
     (locale) => !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`
   )
 
   if (pathnameIsMissingLocale) {
-    // 重定向到默认语言版本
-    return NextResponse.redirect(new URL(`/${fallbackLng}${pathname}`, request.url))
+    // We are on the default locale
+    // Rewrite so Next.js understands
+
+    // e.g. incoming request is /about
+    // Tell Next.js it should pretend it's /en/about
+    return NextResponse.rewrite(new URL(`/${fallbackLng}${pathname}`, request.url))
   }
 }
 
 export const config = {
-  matcher: [
-    // 排除静态文件和API路由
-    '/((?!api|static|track|data|css|scripts|.*\\..*|_next).*|sitemap.xml)',
-    // 排除 robots.txt
-    '/((?!robots.txt).*)',
-  ],
+  // Do not run the middleware on the following paths
+  // prettier-ignore
+  matcher:
+  '/((?!api|static|track|data|css|scripts|.*\\..*|_next).*|sitemap.xml)',
 }
