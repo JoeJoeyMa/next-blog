@@ -5,10 +5,11 @@ import { createTranslation } from '../i18n/server'
 import { LocaleTypes } from '../i18n/settings'
 
 type ProjectsProps = {
-  params: { locale: LocaleTypes }
+  params: Promise<{ locale: LocaleTypes }>
 }
 
-export async function generateMetadata({ params: { locale } }: ProjectsProps): Promise<Metadata> {
+export async function generateMetadata({ params }: ProjectsProps): Promise<Metadata> {
+  const { locale } = await params
   const { t } = await createTranslation(locale, 'projects')
   return genPageMetadata({
     title: t('title'),
@@ -16,7 +17,8 @@ export async function generateMetadata({ params: { locale } }: ProjectsProps): P
   })
 }
 
-export default async function Projects({ params: { locale } }: ProjectsProps) {
+export default async function Projects({ params }: ProjectsProps) {
+  const { locale } = await params
   const { t } = await createTranslation(locale, 'projects')
   return (
     <>

@@ -27,7 +27,7 @@ const ThemeSwitch = () => {
   const [darkModeChecked, setDarkModeChecked] = useState<boolean>(false)
   const menubarRef = useRef<HTMLDivElement>(null)
 
-  useOuterClick(menubarRef, () => setMenuOpen(false))
+  useOuterClick(menubarRef as React.RefObject<HTMLElement>, () => setMenuOpen(false))
 
   // Only show the UI after mounting to prevent hydration mismatch
   useEffect(() => setMounted(true), [])

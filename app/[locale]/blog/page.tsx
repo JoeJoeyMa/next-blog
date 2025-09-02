@@ -8,23 +8,26 @@ import { LocaleTypes } from '../i18n/settings'
 import { POSTS_PER_PAGE } from '@/data/postsPerPage'
 
 type BlogPageProps = {
-  params: { locale: LocaleTypes }
-  searchParams?: { page?: string }
+  params: Promise<{ locale: LocaleTypes }>
+  searchParams?: Promise<{ page?: string }>
 }
 
-export async function generateMetadata({ params: { locale } }: BlogPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: BlogPageProps): Promise<Metadata> {
+  const { locale } = await params
   return genPageMetadata({
     title: 'Blog',
     params: { locale: locale },
   })
 }
 
-export default async function BlogPage({ params: { locale }, searchParams }: BlogPageProps) {
+export default async function BlogPage({ params, searchParams }: BlogPageProps) {
+  const { locale } = await params
+  const resolvedSearchParams = await searchParams
   const { t } = await createTranslation(locale, 'home')
   const posts = allCoreContent(sortPosts(allBlogs))
   const filteredPosts = posts.filter((post) => post.language === locale)
   
-  const pageNumber = parseInt(searchParams?.page || '1')
+  const pageNumber = parseInt(resolvedSearchParams?.page || '1')
   const initialDisplayPosts = filteredPosts.slice(
     POSTS_PER_PAGE * (pageNumber - 1),
     POSTS_PER_PAGE * pageNumber
@@ -37,7 +40,7 @@ export default async function BlogPage({ params: { locale }, searchParams }: Blo
   }
 
   return (
-    <ListLayout 
+    <ListLayout
       params={{ locale }}
       posts={filteredPosts}
       initialDisplayPosts={initialDisplayPosts}

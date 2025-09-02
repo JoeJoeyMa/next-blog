@@ -27,7 +27,8 @@ const space_grotesk = Space_Grotesk({
   variable: '--font-space-grotesk',
 })
 
-export async function generateMetadata({ params: { locale } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale: LocaleTypes }> }): Promise<Metadata> {
+  const { locale } = await params
   return {
     metadataBase: new URL(siteMetadata.siteUrl),
     title: {
@@ -72,13 +73,14 @@ export async function generateMetadata({ params: { locale } }): Promise<Metadata
   }
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
-  params: { locale },
+  params,
 }: {
   children: React.ReactNode
-  params: { locale: LocaleTypes }
+  params: Promise<{ locale: LocaleTypes }>
 }) {
+  const { locale } = await params
   return (
     <html
       lang={locale}

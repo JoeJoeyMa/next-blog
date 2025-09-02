@@ -24,7 +24,8 @@ interface HomeProps {
 
 const MAX_DISPLAY = 5
 
-export default async function HomeLayout({ posts, params: { locale } }: HomeProps) {
+export default async function HomeLayout({ posts, params }: HomeProps) {
+  const { locale } = params
   const { t } = await createTranslation(locale, 'home')
   return (
     <>

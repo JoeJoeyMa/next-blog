@@ -15,10 +15,11 @@ export async function generateStaticParams() {
   }))
 }
 
-export default function Page({ params }: { params: { page: string, locale: LocaleTypes } }) {
+export default async function Page({ params }: { params: Promise<{ page: string, locale: LocaleTypes }> }) {
+  const { page, locale } = await params
   const posts = allCoreContent(sortPosts(allBlogs))
-  const filteredPosts = posts.filter((post) => post.language === params.locale)
-  const pageNumber = parseInt(params.page as string)
+  const filteredPosts = posts.filter((post) => post.language === locale)
+  const pageNumber = parseInt(page as string)
   const initialDisplayPosts = filteredPosts.slice(
     POSTS_PER_PAGE * (pageNumber - 1),
     POSTS_PER_PAGE * pageNumber
@@ -26,7 +27,7 @@ export default function Page({ params }: { params: { page: string, locale: Local
   const pagination = {
     currentPage: pageNumber,
     totalPages: Math.ceil(filteredPosts.length / POSTS_PER_PAGE),
-    params: { locale: params.locale }
+    params: { locale: locale }
   }
 
   return (
@@ -35,7 +36,7 @@ export default function Page({ params }: { params: { page: string, locale: Local
       initialDisplayPosts={initialDisplayPosts}
       pagination={pagination}
       title="All Posts"
-      params={{ locale: params.locale }}
+      params={{ locale: locale }}
     />
   )
 }

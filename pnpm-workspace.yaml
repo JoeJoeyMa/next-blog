@@ -1,0 +1,4 @@
+ignoredBuiltDependencies:
+  - contentlayer2
+  - esbuild
+  - sharp

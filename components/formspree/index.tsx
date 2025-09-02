@@ -6,7 +6,7 @@ import { CModal } from './CModal'
 import { ModalBody } from './CBody'
 import { useContactForm } from './useContactForm'
 
-export const ContactModal = (): JSX.Element => {
+export const ContactModal = () => {
   const contactModal = useContactModal()
   const {
     state,

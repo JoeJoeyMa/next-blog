@@ -10,10 +10,11 @@ import ListLayout from '@/layouts/ListLayout'
 import BlogPage from './blog-page'
 
 type TagsProps = {
-  params: { locale: LocaleTypes }
+  params: Promise<{ locale: LocaleTypes }>
 }
 
-export async function generateMetadata({ params: { locale } }: TagsProps): Promise<Metadata> {
+export async function generateMetadata({ params }: TagsProps): Promise<Metadata> {
+  const { locale } = await params
   const { t } = await createTranslation(locale, 'SEO')
   return genPageMetadata({
     title: 'Tags',
@@ -22,7 +23,8 @@ export async function generateMetadata({ params: { locale } }: TagsProps): Promi
   })
 }
 
-export default async function Page({ params: { locale } }: TagsProps) {
+export default async function Page({ params }: TagsProps) {
+  const { locale } = await params
   const { t } = await createTranslation(locale, 'home')
   const tagCounts = tagData[locale]
   const tagKeys = Object.keys(tagCounts)

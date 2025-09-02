@@ -73,6 +73,8 @@ module.exports = () => {
           pathname: '**',
         },
       ],
+      formats: ['image/webp', 'image/avif'],
+      qualities: [95, 90, 85, 80, 75],
     },
     async headers() {
       return [

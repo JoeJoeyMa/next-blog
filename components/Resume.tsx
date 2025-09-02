@@ -1,15 +1,19 @@
 'use client'
 
-import { useCallback, useState, useRef, useEffect } from 'react'
+import { useCallback, useState, useRef, useEffect, lazy, Suspense } from 'react'
 import { useResizeObserver } from '@wojtekmaj/react-hooks'
-import { pdfjs, Document, Page } from 'react-pdf'
-import 'react-pdf/dist/esm/Page/AnnotationLayer.css'
-import 'react-pdf/dist/esm/Page/TextLayer.css'
 import 'css/pdf.css'
 
-import type { PDFDocumentProxy } from 'pdfjs-dist'
+// Dynamically import PDF components to avoid SSR issues
+const Document = lazy(() => import('react-pdf').then((mod) => ({ default: mod.Document })))
+const Page = lazy(() => import('react-pdf').then((mod) => ({ default: mod.Page })))
 
-pdfjs.GlobalWorkerOptions.workerSrc = '/static/js/pdf.worker.min.js'
+// Dynamically import pdfjs to avoid SSR issues
+const loadPdfjs = async () => {
+  const pdfjs = await import('react-pdf')
+  pdfjs.pdfjs.GlobalWorkerOptions.workerSrc = '/static/js/pdf.worker.min.js'
+  return pdfjs.pdfjs
+}
 
 const options = {
   cMapUrl: '/cmaps/',
@@ -26,8 +30,10 @@ export default function Sample({ filename }) {
   const [scalePercentage, setScalePercentage] = useState<number>(100)
   const maxWidth = useRef<number>(0)
   const [isMobile, setIsMobile] = useState<boolean>(false)
+  const [isClient, setIsClient] = useState<boolean>(false)
   
   useEffect(() => {
+    setIsClient(true)
     // Detect if the device is mobile
     const checkIsMobile = () => {
       setIsMobile(window.innerWidth <= 768)
@@ -85,7 +91,7 @@ export default function Sample({ filename }) {
 
   useResizeObserver(containerRef, resizeObserverOptions, onResize)
 
-  const onDocumentLoadSuccess = useCallback(({ numPages: nextNumPages }: PDFDocumentProxy) => {
+  const onDocumentLoadSuccess = useCallback(({ numPages: nextNumPages }: any) => {
     setNumPages(nextNumPages)
   }, [])
 
@@ -97,29 +103,10 @@ export default function Sample({ filename }) {
     setScalePercentage(isMobile ? 100 : 70)
   }
 
-  return (
-    <div className="PDF__container">
-      <div className="flex w-full justify-center mb-4">
-        <div className="w-full max-w-md flex items-center gap-3">
-          <span className="text-sm text-gray-600 dark:text-gray-300 min-w-[50px]">Zoom: {scalePercentage}%</span>
-          <input 
-            type="range" 
-            min="50" 
-            max="100" 
-            value={scalePercentage} 
-            onChange={handleSliderChange}
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-          />
-          <button 
-            onClick={resetDefaultZoom}
-            className="text-xs bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 px-2 py-1 rounded text-gray-600 dark:text-gray-300"
-          >
-            Reset
-          </button>
-        </div>
-      </div>
-      <div className="PDF__container__document xs:m-0" ref={setContainerRef}>
-        <div style={{ width: `${scalePercentage}%`, margin: '0 auto' }}>
+  const PDFViewer = () => (
+    <div className="PDF__container__document xs:m-0" ref={setContainerRef}>
+      <div style={{ width: `${scalePercentage}%`, margin: '0 auto' }}>
+        <Suspense fallback={<div>Loading PDF viewer...</div>}>
           <Document file={filename} onLoadSuccess={onDocumentLoadSuccess} options={options}>
             {Array.from(new Array(numPages), (el, index) => (
               <Page
@@ -131,8 +118,35 @@ export default function Sample({ filename }) {
               />
             ))}
           </Document>
+        </Suspense>
+      </div>
+    </div>
+  )
+
+  return (
+    <div className="PDF__container">
+      <div className="flex w-full justify-center mb-4">
+        <div className="w-full max-w-md flex items-center gap-3">
+          <span className="text-sm text-gray-600 dark:text-gray-300 min-w-[50px]">Zoom: {scalePercentage}%</span>
+          <input
+            type="range"
+            min="50"
+            max="100"
+            value={scalePercentage}
+            onChange={handleSliderChange}
+            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+            aria-label="Zoom level"
+          />
+          <button
+            onClick={resetDefaultZoom}
+            className="text-xs bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 px-2 py-1 rounded text-gray-600 dark:text-gray-300"
+            aria-label="Reset zoom"
+          >
+            Reset
+          </button>
         </div>
       </div>
+      {isClient ? <PDFViewer /> : <div>Loading PDF viewer...</div>}
     </div>
   )
 }

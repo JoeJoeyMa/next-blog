@@ -9,13 +9,14 @@ import { LocaleTypes } from 'app/[locale]/i18n/settings'
 import tagData from 'app/[locale]/tag-data.json'
 
 interface TagProps {
-  params: {
+  params: Promise<{
     tag: string
     locale: LocaleTypes
-  }
+  }>
 }
 
-export async function generateMetadata({ params: { tag, locale } }: TagProps): Promise<Metadata> {
+export async function generateMetadata({ params }: TagProps): Promise<Metadata> {
+  const { tag, locale } = await params
   return genPageMetadata({
     title: tag,
     params: { locale },
@@ -37,7 +38,8 @@ export const generateStaticParams = async () => {
   return paths
 }
 
-export default function TagPage({ params: { tag, locale } }: TagProps) {
+export default async function TagPage({ params }: TagProps) {
+  const { tag, locale } = await params
   const decodedTag = decodeURI(tag)
   // Capitalize first letter and convert space to dash
   const title = decodedTag[0].toUpperCase() + decodedTag.split(' ').join('-').slice(1)
@@ -45,9 +47,9 @@ export default function TagPage({ params: { tag, locale } }: TagProps) {
   const filteredPosts = allCoreContent(
     sortPosts(
       allBlogs.filter(
-        (post) => 
-          post.language === locale && 
-          post.tags && 
+        (post) =>
+          post.language === locale &&
+          post.tags &&
           post.tags.map((t) => slug(t)).includes(decodedTag)
       )
     )
@@ -58,10 +60,10 @@ export default function TagPage({ params: { tag, locale } }: TagProps) {
   }
 
   return (
-    <ListLayout 
-      posts={filteredPosts} 
-      title={title} 
-      params={{ locale }} 
+    <ListLayout
+      posts={filteredPosts}
+      title={title}
+      params={{ locale }}
     />
   )
 }

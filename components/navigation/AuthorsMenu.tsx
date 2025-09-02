@@ -56,7 +56,7 @@ const AuthorsMenu = ({ className }: AuthorsMenuProps) => {
   }
 
   const menubarRef = useRef<HTMLDivElement>(null)
-  useOuterClick(menubarRef, closeMenu)
+  useOuterClick(menubarRef as React.RefObject<HTMLElement>, closeMenu)
 
   const isSelected = authors.some((author) => author.slug.includes(lastSection)) && filterSections
 

@@ -10,12 +10,13 @@ import { notFound } from 'next/navigation'
 import StyledComments from '@/components/comments/StyledComments'
 
 type AboutProps = {
-  params: { authors: string[]; locale: LocaleTypes }
+  params: Promise<{ authors: string[]; locale: LocaleTypes }>
 }
 
 export async function generateMetadata({
-  params: { authors, locale },
+  params,
 }: AboutProps): Promise<Metadata | undefined> {
+  const { authors, locale } = await params
   const authorSlug = decodeURI(authors.join('/'))
   const author = allAuthors.find((a) => a.slug === authorSlug && a.language === locale) as Authors
   if (!author) {
@@ -29,7 +30,8 @@ export async function generateMetadata({
   })
 }
 
-export default async function Page({ params: { authors, locale } }: AboutProps) {
+export default async function Page({ params }: AboutProps) {
+  const { authors, locale } = await params
   const authorSlug = decodeURI(authors.join('/'))
   const author = allAuthors.find((a) => a.slug === authorSlug && a.language === locale) as Authors
   const authorIndex = allAuthors.findIndex((p) => p.slug === authorSlug)

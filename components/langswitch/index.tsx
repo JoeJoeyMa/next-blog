@@ -22,7 +22,7 @@ const LangSwitch = () => {
   const setSelectedTag = useTagStore((state) => state.setSelectedTag)
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false)
   const menubarRef = useRef<HTMLDivElement>(null)
-  useOuterClick(menubarRef, () => setIsMenuOpen(false))
+  useOuterClick(menubarRef as React.RefObject<HTMLElement>, () => setIsMenuOpen(false))
 
   const handleLocaleChange = useCallback(
     (newLocale: string): string => {

@@ -15,7 +15,7 @@ const Sidetoc = ({ toc }: SidetocProps) => {
   const { closeSidebar } = useSidebarStore()
   const menubarRef = useRef<HTMLDivElement>(null)
 
-  useOuterClick(menubarRef, closeSidebar)
+  useOuterClick(menubarRef as React.RefObject<HTMLElement>, closeSidebar)
 
   return (
     <div ref={menubarRef}>

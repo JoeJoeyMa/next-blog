@@ -11,10 +11,11 @@ import TabSwitcher from '@/components/TabSwitcher'
 import { createTranslation } from './i18n/server'
 
 type HomeProps = {
-  params: { locale: LocaleTypes }
+  params: Promise<{ locale: LocaleTypes }>
 }
 
-export default async function Page({ params: { locale } }: HomeProps) {
+export default async function Page({ params }: HomeProps) {
+  const { locale } = await params
   const sortedPosts = sortPosts(allBlogs)
   const posts = allCoreContent(sortedPosts)
   const filteredPosts = posts.filter((p) => p.language === locale)
@@ -23,14 +24,17 @@ export default async function Page({ params: { locale } }: HomeProps) {
   const mainContent = coreContent(author)
   const { t } = await createTranslation(locale, 'home')
 
+  const FeaturedContent = await FeaturedLayout({ posts: hasFeaturedPosts, params: { locale } })
+  const HomeContent = await HomeLayout({ posts: filteredPosts, params: { locale } })
+
   return (
     <>
       <AuthorCard content={mainContent} locale={locale} />
       <Intro />
       <Projects />
       <TabSwitcher
-        featuredContent={<FeaturedLayout posts={hasFeaturedPosts} params={{ locale }} />}
-        homeContent={<HomeLayout posts={filteredPosts} params={{ locale }} />}
+        featuredContent={FeaturedContent}
+        homeContent={HomeContent}
         featuredLabel={t('featured')}
         homeLabel={t('greeting')}
       />
