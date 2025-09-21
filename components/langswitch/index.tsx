@@ -3,15 +3,7 @@ import { usePathname, useParams, useRouter } from 'next/navigation'
 import { useOuterClick } from '../util/useOuterClick'
 import { useTagStore } from '@/components/util/useTagStore'
 import { LocaleTypes, locales } from 'app/[locale]/i18n/settings'
-import {
-  Menu,
-  Transition,
-  RadioGroup,
-  MenuButton,
-  MenuItems,
-  Radio,
-  MenuItem,
-} from '@headlessui/react'
+import { Menu, Transition, MenuButton, MenuItems, MenuItem } from '@headlessui/react'
 import { ChevronDownIcon } from './icon'
 
 const LangSwitch = () => {
@@ -55,7 +47,7 @@ const LangSwitch = () => {
     <div ref={menubarRef} className="relative inline-block text-left">
       <Menu>
         {({ open }) => (
-          <>
+          <div>
             <MenuButton
               className="inline-flex rounded-md px-1 py-2 font-bold leading-5 text-gray-700 shadow-sm dark:text-white"
               aria-haspopup="true"
@@ -81,37 +73,27 @@ const LangSwitch = () => {
                 aria-orientation="vertical"
                 onBlur={() => setIsMenuOpen(false)}
               >
-                <RadioGroup>
-                  <div
-                    className="py-1"
-                    role="none"
-                    style={{ listStyle: 'none', margin: 0, padding: 0 }}
-                  >
-                    {locales.map((newLocale: string) => (
-                      <Radio key={newLocale} value={newLocale}>
-                        <MenuItem>
-                          {({ focus }) => (
-                            <button
-                              onClick={() => handleLinkClick(newLocale)}
-                              className={`${
-                                focus
-                                  ? 'bg-gray-100 dark:bg-gray-600'
-                                  : 'hover:bg-gray-100 dark:hover:bg-gray-600'
-                              } rounded-md px-4 py-2 text-sm text-gray-700 hover:text-primary-500 dark:text-white dark:hover:text-primary-500`}
-                              role="menuitem"
-                              style={{ display: 'block', width: '100%', textDecoration: 'none' }}
-                            >
-                              {newLocale.charAt(0).toUpperCase() + newLocale.slice(1)}
-                            </button>
-                          )}
-                        </MenuItem>
-                      </Radio>
-                    ))}
-                  </div>
-                </RadioGroup>
+                <div className="py-1" role="none">
+                  {locales.map((newLocale: string) => (
+                    <MenuItem key={newLocale}>
+                      {({ focus }) => (
+                        <button
+                          onClick={() => handleLinkClick(newLocale)}
+                          className={`${
+                            focus
+                              ? 'bg-gray-100 dark:bg-gray-600'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-600'
+                          } block w-full rounded-md px-4 py-2 text-left text-sm text-gray-700 hover:text-primary-500 dark:text-white dark:hover:text-primary-500`}
+                        >
+                          {newLocale.charAt(0).toUpperCase() + newLocale.slice(1)}
+                        </button>
+                      )}
+                    </MenuItem>
+                  ))}
+                </div>
               </MenuItems>
             </Transition>
-          </>
+          </div>
         )}
       </Menu>
     </div>
