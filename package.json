@@ -99,8 +99,9 @@
       "prettier --write"
     ]
   },
+  "packageManager": "pnpm@10.15.1",
   "engines": {
-    "node": "20"
+    "pnpm": ">=8"
   },
   "volta": {
     "node": "20.11.1"
