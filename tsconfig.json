@@ -18,7 +18,7 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
       "@/components/*": [
@@ -54,7 +54,8 @@
     ".contentlayer/generated",
     ".contentlayer/generated/**/*.json",
     ".next/types/**/*.ts",
-    "data/siteMetadata.js"
+    "data/siteMetadata.js",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"
